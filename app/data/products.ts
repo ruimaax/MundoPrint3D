@@ -1,34 +1,93 @@
 export type Product = {
+  id: string;
   title: string;
-  category: string;
-  image: string;
   description: string;
+  // Aparece como etiqueta pequeña sobre la tarjeta (solo destacados).
+  tagline?: string;
+  // Los destacados salen en grande arriba; el resto va en el carrusel.
   featured?: boolean;
+  // Cuando haya foto real: guárdala en /public/products y añade
+  // image: "/products/nombre.webp". Sustituye a la ilustración.
+  image?: string;
 };
 
-// Para publicar una pieza nueva: guarda la foto en /public/products y añade
-// aquí una entrada. La galería se adapta sola a escritorio y móvil.
+// Categorías del carrusel principal y del bloque "Categorías destacadas".
+// El color es el fondo de la tarjeta; el id apunta a su ilustración.
+export type Category = {
+  id: string;
+  title: string;
+  // Debe coincidir con una opción de PROJECT_TYPES (QuoteForm) para que el
+  // formulario llegue con el tipo ya elegido.
+  orderTitle: string;
+  bg: string;
+  dark?: boolean;
+  image?: string;
+};
+
+export const categories: Category[] = [
+  { id: "funko-personalizado", title: "Funkos personalizados", orderTitle: "Funko personalizado", bg: "#6c4cff", dark: true, image: "/products/funko_personalizado.jpg" },
+  { id: "funko-seleccion", title: "Funkos de la Selección", orderTitle: "Funkos de la Selección", bg: "#ffb97a", image: "/products/funko_seleccion.jpg" },
+  { id: "funko-semanasanta", title: "Semana Santa", orderTitle: "Funkos de Semana Santa", bg: "#c4b5fd" },
+  { id: "mascota", title: "Funkos de mascotas", orderTitle: "Funko de tu mascota", bg: "#fcd34d", image: "/products/mascota.jpg" },
+  { id: "llaveros", title: "Llaveros y detalles", orderTitle: "Llaveros", bg: "#7dd3fc", image: "/products/llaveros.jpg" },
+  { id: "rotulos", title: "Rótulos y nombres", orderTitle: "Rótulos y nombres", bg: "#f9a8d4", image: "/products/rotulos.jpg" },
+  { id: "deco", title: "Decoración y figuras", orderTitle: "Decoración y figuras", bg: "#86efac", image: "/products/deco.jpg" },
+  { id: "medida", title: "Piezas a medida", orderTitle: "Piezas a medida", bg: "#e2e8f0", image: "/products/medida.jpg" },
+];
+
 export const products: Product[] = [
   {
-    title: "Rótulos y nombres",
-    category: "Personalización",
-    image: "/video-split/frame_080.webp",
-    description:
-      "Logotipos, nombres y placas con color, volumen y personalidad propia.",
+    id: "funko-personalizado",
+    title: "Funko personalizado",
+    tagline: "El más pedido",
     featured: true,
+    description:
+      "Tú, tu pareja o quien tú quieras convertido en figura. Me pasas una foto y lo modelo con su ropa, su pelo y sus detalles.",
   },
   {
-    title: "Prototipos a medida",
-    category: "Diseño funcional",
-    image: "/video-split/frame_045.webp",
+    id: "funko-seleccion",
+    title: "Funkos de la Selección",
     description:
-      "Pruebas de concepto y piezas que ayudan a validar una idea antes de producirla.",
+      "Los jugadores de la Selección Española en versión funko. Para coleccionar o para regalar el de tu favorito.",
   },
   {
-    title: "Series pequeñas",
-    category: "Producción",
-    image: "/video-split/frame_018.webp",
+    id: "funko-semanasanta",
+    title: "Funkos de Semana Santa",
     description:
-      "Unidades repetibles para eventos, marcas, regalos o pequeños negocios.",
+      "Nazarenos y costaleros en miniatura, con la túnica y los colores de tu hermandad.",
+  },
+  {
+    id: "mascota",
+    title: "Funko de tu mascota",
+    tagline: "Para los peludos",
+    featured: true,
+    description: "Tu perro o tu gato hecho figura, a partir de una foto.",
+  },
+  {
+    id: "rotulos",
+    title: "Rótulos y nombres",
+    description: "Nombres, logos y frases con volumen, para pared o mesa.",
+  },
+  {
+    id: "llaveros",
+    title: "Llaveros",
+    tagline: "El detalle top",
+    featured: true,
+    description: "Con nombre, con forma de lo que quieras o con tu escudo.",
+  },
+  {
+    id: "eventos",
+    title: "Detalles para eventos",
+    description: "Bodas, comuniones y cumples: series de detalles iguales.",
+  },
+  {
+    id: "deco",
+    title: "Decoración y figuras",
+    description: "Macetas, soportes y piezas decorativas a tu gusto.",
+  },
+  {
+    id: "medida",
+    title: "Piezas a medida",
+    description: "Recambios y piezas que no se venden en ningún sitio.",
   },
 ];

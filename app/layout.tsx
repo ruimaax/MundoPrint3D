@@ -1,17 +1,37 @@
 import type { Metadata } from "next";
+import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
+
+const display = Baloo_2({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
+});
+
+const body = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+  variable: "--font-body",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ),
-  title: "Mundo Print 3D — Diseño e impresión 3D a medida",
+  title: "Mundo Print 3D — Funkos personalizados y regalos impresos en 3D",
   description:
-    "Piezas personalizadas, regalos, prototipos y series pequeñas en impresión 3D. Envía tu idea mediante foto o enlace y pide presupuesto.",
-  keywords: ["impresión 3D", "diseño 3D", "piezas personalizadas", "prototipos", "regalos personalizados"],
+    "Funkos personalizados, Funkos de la Selección, ediciones de Semana Santa, rótulos, llaveros y regalos únicos impresos en 3D. Pide el tuyo en un minuto.",
+  keywords: [
+    "funkos personalizados",
+    "impresión 3D",
+    "regalos personalizados",
+    "funko selección española",
+    "funko semana santa",
+    "rótulos 3D",
+  ],
   openGraph: {
     title: "Mundo Print 3D",
-    description: "Tu mundo, impreso. Diseño e impresión 3D a medida.",
+    description: "Funkos personalizados y regalos únicos impresos en 3D.",
     images: ["/brand/mundo-print-3d-original.jpeg"],
     locale: "es_ES",
     type: "website",
@@ -28,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );
