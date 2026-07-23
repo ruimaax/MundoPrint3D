@@ -8,18 +8,23 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: [
-          "Inter",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "San Francisco",
-          "Segoe UI",
-          "sans-serif",
-        ],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "sans-serif"],
       },
       colors: {
-        filament: "#FF7A3D",
-        void: "#050505",
+        toy: {
+          paper: "var(--paper)",
+          cream: "var(--cream)",
+          ink: "var(--ink)",
+          red: "var(--red)",
+          blue: "var(--blue)",
+          yellow: "var(--yellow)",
+          green: "var(--green)",
+          pink: "var(--pink)",
+        },
+      },
+      maxWidth: {
+        shell: "78rem",
       },
     },
   },

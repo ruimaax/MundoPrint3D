@@ -23,6 +23,3 @@ vite.config.d.ts
 
 # OS
 .DS_Store
-
-# Video/media assets
-video-split

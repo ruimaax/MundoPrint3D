@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { GalleryPiece } from "../components/Gallery";
 import FunkoEyes from "../components/FunkoEyes";
-import Header from "../components/Header";
-import MiniFunko from "../components/MiniFunko";
-import WhatsAppBubble from "../components/WhatsAppBubble";
+import { FunkoGuide } from "../components/MiniFunko";
+import SiteNav from "../components/SiteNav";
+import WhatsAppDock from "../components/WhatsAppDock";
+import WorksGrid from "../components/WorksGrid";
 import { getGallery } from "../data/gallery";
 
 export const metadata: Metadata = {
-  title: "Galería de trabajos — Mundo Print 3D",
+  title: "La vitrina — Mundo Print 3D",
   description:
     "Todos los funkos personalizados, figuras de mascotas y piezas a medida que han salido del taller de Mundo Print 3D.",
 };
@@ -16,49 +16,59 @@ export default function GaleriaPage() {
   const items = getGallery();
 
   return (
-    <main className="min-h-screen bg-white text-[#191430]">
+    <main className="min-h-screen">
       <FunkoEyes />
-      <Header />
+      <SiteNav />
 
-      <section className="px-5 pb-20 pt-28 sm:px-8 sm:pt-32">
-        <div className="mx-auto max-w-6xl">
+      <section className="field-blue px-5 pb-12 pt-24 sm:px-8 sm:pt-28">
+        <div className="mx-auto max-w-shell">
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="max-w-xl">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-violet-700">
-                Galería completa
-              </p>
-              <h1 className="font-display mt-2 text-4xl font-extrabold sm:text-5xl">
-                Todo lo que ha salido del taller
+            <div>
+              <p className="kicker rise text-toy-yellow">La vitrina · {items.length} piezas</p>
+              <h1
+                className="display rise mt-3 text-5xl sm:text-7xl"
+                style={{ "--rise-delay": "70ms" } as React.CSSProperties}
+              >
+                Todo lo que ha <span className="text-toy-yellow">salido del taller</span>
               </h1>
-              <p className="mt-3 leading-7 text-[#191430]/70">
+              <p
+                className="rise mt-4 max-w-md font-medium leading-7 text-white/85"
+                style={{ "--rise-delay": "150ms" } as React.CSSProperties}
+              >
                 Cada pieza se modeló para una persona concreta. La tuya puede
                 ser la siguiente.
               </p>
             </div>
-            <div className="funko-guide">
-              <MiniFunko variant="fotografo" className="funko-idle w-16 shrink-0 sm:w-20" />
-              <p className="speech">¿Cuál te pido? Ah no, que es al revés.</p>
-            </div>
+            <FunkoGuide variant="fotografo" flip className="rise">
+              Filtra por tipo y elige tu favorito.
+            </FunkoGuide>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <GalleryPiece key={item.id} {...item} />
-            ))}
-          </div>
+      <section className="px-5 py-14 sm:px-8">
+        <div className="mx-auto max-w-shell">
+          <WorksGrid items={items} filterable />
 
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-            <a className="btn-pop btn-grape text-lg" href="/#encargo">
+          <div className="mt-14 flex flex-wrap justify-center gap-4">
+            <a className="btn btn-red text-lg" href="/#pedido">
               Pedir el mío
             </a>
-            <a className="btn-pop btn-white text-lg" href="/">
-              Volver a la portada
+            <a className="btn btn-ink text-lg" href="/">
+              ← Volver a la tienda
             </a>
           </div>
         </div>
       </section>
 
-      <WhatsAppBubble />
+      <footer className="bg-toy-ink px-5 py-10 text-center text-white sm:px-8">
+        <p className="display text-3xl">Tu mundo, impreso en 3D</p>
+        <p className="mt-3 text-sm font-medium text-white/55">
+          Mundo Print 3D · España · © {new Date().getFullYear()}
+        </p>
+      </footer>
+
+      <WhatsAppDock />
     </main>
   );
 }

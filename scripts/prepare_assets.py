@@ -1,4 +1,4 @@
-"""Prepare the supplied logo and the scroll animation for the website."""
+"""Prepare the supplied logo for the website."""
 
 from collections import deque
 from pathlib import Path
@@ -8,7 +8,6 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 BRAND_DIR = ROOT / "public" / "brand"
-FRAME_DIR = ROOT / "public" / "video-split"
 
 
 def is_background(pixel: tuple[int, int, int]) -> bool:
@@ -56,20 +55,5 @@ def extract_logo() -> None:
     result.putalpha(alpha)
     result.save(destination, optimize=True)
 
-
-def convert_scroll_frames() -> None:
-    for source in sorted(FRAME_DIR.glob("ffout*.gif")):
-        number = source.stem.removeprefix("ffout")
-        destination = FRAME_DIR / f"frame_{number}.webp"
-        with Image.open(source) as image:
-            image.convert("RGB").save(
-                destination,
-                "WEBP",
-                quality=76,
-                method=6,
-            )
-
-
 if __name__ == "__main__":
     extract_logo()
-    convert_scroll_frames()

@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Baloo_2, Nunito } from "next/font/google";
+import { Anton, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
-const display = Baloo_2({
+const display = Anton({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+  weight: "400",
   variable: "--font-display",
+  display: "swap",
 });
 
-const body = Nunito({
+const body = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,12 +22,12 @@ export const metadata: Metadata = {
   ),
   title: "Mundo Print 3D — Funkos personalizados y regalos impresos en 3D",
   description:
-    "Funkos personalizados, Funkos de la Selección, ediciones de Semana Santa, rótulos, llaveros y regalos únicos impresos en 3D. Pide el tuyo en un minuto.",
+    "Funkos con tu cara, tu mascota hecha figura, rótulos, llaveros y piezas a medida impresas en 3D. Míralo en el catálogo y pídelo por WhatsApp.",
   keywords: [
     "funkos personalizados",
     "impresión 3D",
     "regalos personalizados",
-    "funko selección española",
+    "funko de mascota",
     "funko semana santa",
     "rótulos 3D",
   ],

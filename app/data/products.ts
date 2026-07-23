@@ -24,15 +24,22 @@ export type Category = {
   image?: string;
 };
 
+// OJO: varios archivos de /public/products están intercambiados en disco
+// (el nombre no coincide con el arte que contienen). Las rutas de aquí
+// apuntan al ARTE correcto, no al nombre "lógico":
+//   funko_seleccion.jpg  → arte de "Piezas a medida"
+//   rotulos.jpg          → arte de "Semana Santa"
+//   medida.jpg           → arte de "Rótulos y nombres"
+// Para la Selección no hay promo; usamos la foto real de un encargo futbolero.
 export const categories: Category[] = [
   { id: "funko-personalizado", title: "Funkos personalizados", orderTitle: "Funko personalizado", bg: "#6c4cff", dark: true, image: "/products/funko_personalizado.jpg" },
-  { id: "funko-seleccion", title: "Funkos de la Selección", orderTitle: "Funkos de la Selección", bg: "#ffb97a", image: "/products/funko_seleccion.jpg" },
-  { id: "funko-semanasanta", title: "Semana Santa", orderTitle: "Funkos de Semana Santa", bg: "#c4b5fd" },
+  { id: "funko-seleccion", title: "Funkos de la Selección", orderTitle: "Funkos de la Selección", bg: "#ffb97a", image: "/gallery/ceuti1.webp" },
+  { id: "funko-semanasanta", title: "Semana Santa", orderTitle: "Funkos de Semana Santa", bg: "#c4b5fd", image: "/products/rotulos.jpg" },
   { id: "mascota", title: "Funkos de mascotas", orderTitle: "Funko de tu mascota", bg: "#fcd34d", image: "/products/mascota.jpg" },
   { id: "llaveros", title: "Llaveros y detalles", orderTitle: "Llaveros", bg: "#7dd3fc", image: "/products/llaveros.jpg" },
-  { id: "rotulos", title: "Rótulos y nombres", orderTitle: "Rótulos y nombres", bg: "#f9a8d4", image: "/products/rotulos.jpg" },
+  { id: "rotulos", title: "Rótulos y nombres", orderTitle: "Rótulos y nombres", bg: "#f9a8d4", image: "/products/medida.jpg" },
   { id: "deco", title: "Decoración y figuras", orderTitle: "Decoración y figuras", bg: "#86efac", image: "/products/deco.jpg" },
-  { id: "medida", title: "Piezas a medida", orderTitle: "Piezas a medida", bg: "#e2e8f0", image: "/products/medida.jpg" },
+  { id: "medida", title: "Piezas a medida", orderTitle: "Piezas a medida", bg: "#e2e8f0", image: "/products/funko_seleccion.jpg" },
 ];
 
 export const products: Product[] = [

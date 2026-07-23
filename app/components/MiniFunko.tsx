@@ -254,9 +254,9 @@ export function FunkoGuide({
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`funko-guide ${flip ? "flip" : ""} ${className ?? ""}`} {...rest}>
+    <div className={`guide ${flip ? "flip" : ""} ${className ?? ""}`} {...rest}>
       <MiniFunko variant={variant} className="funko-idle w-16 shrink-0 sm:w-20" />
-      <p className="speech">{children}</p>
+      <p className="bubble">{children}</p>
     </div>
   );
 }
