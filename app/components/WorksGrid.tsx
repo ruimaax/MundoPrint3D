@@ -47,8 +47,13 @@ export default function WorksGrid({
       )}
 
       <div className="shots">
-        {visible.map((item) => (
-          <figure key={item.id} className="shot m-0">
+        {visible.map((item, i) => (
+          <figure
+            key={item.id}
+            className="shot m-0"
+            data-reveal="pop"
+            style={{ "--i": i % 6 } as React.CSSProperties}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={item.after} alt={`${item.title} — ${item.category}`} loading="lazy" />
             <figcaption>

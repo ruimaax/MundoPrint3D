@@ -34,7 +34,8 @@ export default function ProductWall() {
             target="_blank"
             rel="noopener noreferrer"
             className={`tile ${SPAN[cat.id] ?? ""}`}
-            style={{ "--tile": TINT[cat.id] } as React.CSSProperties}
+            data-reveal="pop"
+            style={{ "--tile": TINT[cat.id], "--i": i } as React.CSSProperties}
           >
             {product?.tagline && <span className="flag">{product.tagline}</span>}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -47,7 +48,7 @@ export default function ProductWall() {
               {(SPAN[cat.id] || cat.id === "funko-personalizado") && product?.description && (
                 <p className="max-w-sm">{product.description}</p>
               )}
-              <span className="go">Pedir por WhatsApp →</span>
+              <span className="go">Pedir por WhatsApp <b aria-hidden>→</b></span>
             </span>
           </a>
         );

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   ),
-  title: "Mundo Print 3D — Funkos personalizados y regalos impresos en 3D",
+  title: "Funkos personalizados en 3D",
   description:
     "Funkos con tu cara, tu mascota hecha figura, rótulos, llaveros y piezas a medida impresas en 3D. Míralo en el catálogo y pídelo por WhatsApp.",
   keywords: [

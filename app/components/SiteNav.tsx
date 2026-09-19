@@ -39,7 +39,7 @@ export default function SiteNav() {
               {link.label}
             </a>
           ))}
-          <a href="/#pedido" className="btn btn-red !py-2.5 !px-5 text-sm">
+          <a href="/#pedido" className="btn btn-red nudge !py-2.5 !px-5 text-sm">
             Pedir por WhatsApp
           </a>
         </nav>

@@ -1,5 +1,5 @@
 // Datos de contacto del taller. Cambiar aquí y se actualiza toda la web.
-export const PHONE = "34623173625";
+export const PHONE = "34644195590";
 
 export function waLink(message: string): string {
   return `https://wa.me/${PHONE}?text=${encodeURIComponent(message)}`;

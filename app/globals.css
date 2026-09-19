@@ -81,25 +81,6 @@ img {
   -webkit-text-stroke: 2px currentColor;
 }
 
-/* subrayado marcador, trazo irregular hecho a mano */
-.mark {
-  position: relative;
-  white-space: nowrap;
-}
-
-.mark::after {
-  content: "";
-  position: absolute;
-  left: -2%;
-  right: -2%;
-  bottom: 0.02em;
-  height: 0.34em;
-  z-index: -1;
-  background: var(--mark, var(--yellow));
-  border-radius: 40% 60% 55% 45% / 60% 50% 60% 40%;
-  transform: rotate(-1.2deg);
-}
-
 /* estrella de marca reutilizable */
 .starmark {
   display: inline-block;
@@ -204,18 +185,6 @@ img {
 .field-red { background: var(--red); color: var(--cream); }
 .field-yellow { background: var(--yellow); color: var(--ink); }
 .field-ink { background: var(--ink); color: var(--cream); }
-
-/* franja fina de puntos-estrella entre secciones */
-.rule-stars {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.9rem;
-  color: var(--red);
-  font-size: 0.8rem;
-  letter-spacing: 0.4em;
-  padding: 0.9rem 0;
-}
 
 /* ---------- muro de productos (bento) ---------- */
 
@@ -593,6 +562,66 @@ select.input {
   background-position: right 1.1rem center;
 }
 
+.form-step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.form-step span {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: var(--yellow);
+  font-family: var(--font-body), sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2px rgba(32, 20, 54, 0.16);
+}
+
+.stepper button {
+  width: 2.9rem;
+  height: 3rem;
+  font-weight: 800;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.stepper output {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--ink);
+}
+
 /* ---------- entrada suave (solo hero) ---------- */
 
 .rise {
@@ -606,11 +635,643 @@ select.input {
   to { opacity: 1; transform: none; }
 }
 
+/* ---------- pie de página ---------- */
+
+.foot {
+  position: relative;
+  background:
+    radial-gradient(40% 60% at 100% 0%, rgba(31, 69, 255, 0.16), transparent 70%),
+    #140c25;
+}
+
+/* franja de colores de la marca que separa el pie del resto */
+.foot-stripe {
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--red) 0 25%,
+    var(--yellow) 25% 50%,
+    var(--blue) 50% 75%,
+    var(--pink) 75% 100%
+  );
+}
+
+.foot-head {
+  font-weight: 800;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.foot-link {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.15s ease, padding 0.2s ease;
+}
+
+.foot-link:hover {
+  color: white;
+  padding-left: 0.35rem;
+}
+
+.foot-icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.22);
+  transition: all 0.18s ease;
+}
+
+.foot-icon:hover {
+  color: var(--ink);
+  background: var(--yellow);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.foot-phone {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.01em;
+  padding-bottom: 0.3rem;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.18);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.foot-phone:hover {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
+.foot-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 800;
+  color: white;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.25);
+  transition: all 0.18s ease;
+}
+
+.foot-cta:hover {
+  background: var(--red);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.foot-cta span {
+  transition: transform 0.18s ease;
+}
+
+.foot-cta:hover span {
+  transform: translate(2px, -2px);
+}
+
+.foot-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* la marca en gigante, con brillo de juguete recién pintado */
+.foot-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 1.6rem);
+  padding: clamp(1.8rem, 5vw, 3.6rem) 0;
+  transition: transform 0.25s ease;
+}
+
+.foot-brand:hover {
+  transform: translateY(-3px) rotate(-0.4deg);
+}
+
+/* el logo lleva letras negras: un contorno blanco de pegatina hace que se
+   lean sobre el fondo oscuro sin ponerle fondo */
+.foot-logo {
+  flex-shrink: 0;
+  width: clamp(3.2rem, 12vw, 10rem);
+  height: auto;
+  filter:
+    drop-shadow(1.5px 0 0 var(--cream))
+    drop-shadow(-1.5px 0 0 var(--cream))
+    drop-shadow(0 1.5px 0 var(--cream))
+    drop-shadow(0 -1.5px 0 var(--cream))
+    drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+  animation: float 6s ease-in-out infinite;
+}
+
+.foot-word {
+  font-family: var(--font-display), sans-serif;
+  text-transform: uppercase;
+  line-height: 0.9;
+  font-size: clamp(2rem, calc(11.4vw - 14px), 8.6rem);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  color: var(--cream);
+}
+
+.foot-word span {
+  color: var(--red);
+}
+
+/* ---------- movimiento ---------- */
+
+/* Entradas al aparecer en pantalla (ScrollReveal). Se usa animation con
+   fill "backwards" para que, al terminar, el hover de cada pieza siga
+   funcionando con sus propias transiciones. */
+.reveal-ready [data-reveal]:not(.is-in) {
+  opacity: 0;
+}
+
+[data-reveal].is-in {
+  animation: reveal-up 0.7s cubic-bezier(0.22, 0.8, 0.3, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+[data-reveal="pop"].is-in {
+  animation-name: reveal-pop;
+  animation-duration: 0.65s;
+  animation-timing-function: cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+
+[data-reveal="side"].is-in {
+  animation-name: reveal-side;
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-pop {
+  from { opacity: 0; transform: translateY(26px) scale(0.9) rotate(-1.5deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-side {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* pasos: el número rebota y el bocadillo sale después */
+.step.is-in .n {
+  display: inline-block;
+  animation: num-pop 0.7s cubic-bezier(0.34, 1.7, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms + 150ms);
+}
+
+.step.is-in .bubble {
+  transform-origin: 0 100%;
+  animation: bubble-pop 0.5s cubic-bezier(0.34, 1.6, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms + 550ms);
+}
+
+@keyframes num-pop {
+  from { transform: scale(0.2) rotate(-25deg); }
+  to { transform: none; }
+}
+
+@keyframes bubble-pop {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: none; }
+}
+
+/* hero: estrella que gira, foto que flota */
+.hero-star {
+  animation: spin-slow 26s linear infinite;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.hero-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-12px) rotate(0.8deg); }
+}
+
+.sparkle {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.55) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+/* tarjetas: se inclinan un poco al pasar el ratón y la flecha empuja */
+.tile:nth-child(odd):hover { transform: translateY(-6px) rotate(-0.7deg); }
+.tile:nth-child(even):hover { transform: translateY(-6px) rotate(0.7deg); }
+.shot:nth-child(odd):hover { transform: translateY(-6px) rotate(-1deg); }
+.shot:nth-child(even):hover { transform: translateY(-6px) rotate(1deg); }
+
+.tile .go b {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.tile:hover .go b {
+  animation: nudge-x 0.7s ease-in-out infinite;
+}
+
+@keyframes nudge-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+.tile .flag {
+  animation: flag-wiggle 5s ease-in-out infinite;
+  transform-origin: 0 50%;
+}
+
+@keyframes flag-wiggle {
+  0%, 86%, 100% { transform: rotate(0); }
+  89% { transform: rotate(-6deg); }
+  92% { transform: rotate(5deg); }
+  95% { transform: rotate(-3deg); }
+}
+
+/* botón de pedir del menú: un meneo de vez en cuando */
+.nudge {
+  animation: nudge 7s ease-in-out 2s infinite;
+}
+
+@keyframes nudge {
+  0%, 88%, 100% { transform: rotate(0); }
+  90% { transform: rotate(-4deg) scale(1.05); }
+  93% { transform: rotate(4deg) scale(1.05); }
+  96% { transform: rotate(-2deg); }
+}
+
+/* WhatsApp: onda que late */
+.wa-dock::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 0 var(--green);
+  animation: ping 2.6s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 70%, transparent); }
+  80%, 100% { box-shadow: 0 0 0 18px transparent; }
+}
+
+/* FAQ: la respuesta se desliza al abrir */
+.faq[open] p {
+  animation: faq-open 0.35s ease;
+}
+
+@keyframes faq-open {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* formulario: cambio de bloque y contador que salta */
+.swap-in {
+  animation: swap-in 0.4s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@keyframes swap-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bump {
+  display: inline-block;
+  animation: bump 0.3s cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+
+@keyframes bump {
+  from { transform: scale(1.5); }
+  to { transform: none; }
+}
+
+/* ---------- escena del hero: de tu foto a tu figura ---------- */
+
+.ps {
+  --t: 10s;
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 26px;
+  background:
+    linear-gradient(rgba(32, 20, 54, 0.05) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(32, 20, 54, 0.05) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--cream);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.6);
+  color: var(--ink);
+}
+
+.ps-photo {
+  position: absolute;
+  left: 6%;
+  top: 8%;
+  width: 34%;
+  margin: 0;
+  padding: 0.55rem 0.55rem 0;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 14px 28px -12px rgba(32, 20, 54, 0.55);
+  transform: rotate(-7deg);
+  transform-origin: 50% 0;
+  animation: photo-sway 5s ease-in-out infinite;
+}
+
+.ps-slides {
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.ps-slides svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ps-photo figcaption {
+  display: grid;
+  justify-items: center;
+  padding: 0.35rem 0 0.45rem;
+  line-height: 1.15;
+}
+
+.ps-photo figcaption strong {
+  font-weight: 800;
+  font-style: italic;
+  font-size: clamp(0.8rem, 1.6vw, 1.05rem);
+}
+
+.ps-sub {
+  font-size: clamp(0.68rem, 1.2vw, 0.82rem);
+  font-weight: 700;
+  color: var(--red);
+}
+
+/* la idea nueva entra con un pequeño fundido */
+.ps-fade {
+  animation: ps-fade 0.6s ease-out;
+}
+
+@keyframes ps-fade {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: none; }
+}
+
+.ps-pin {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 999px;
+  background: var(--red);
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.2), 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes photo-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(-4deg); }
+}
+
+.ps-arrow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ps-arrow path:first-child {
+  animation: dash-flow 1.2s linear infinite;
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -10.8; }
+}
+
+.ps-printer {
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
+  width: 52%;
+  aspect-ratio: 300 / 340;
+}
+
+.ps-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ps-screen {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  fill: #7dd3fc;
+}
+
+.ps-screen--busy { animation: screen-busy var(--t) linear forwards; }
+.ps-screen--done { fill: var(--yellow); opacity: 0; animation: screen-done var(--t) linear forwards; }
+
+@keyframes screen-busy {
+  0%, 58% { opacity: 1; }
+  59%, 100% { opacity: 0; }
+}
+
+@keyframes screen-done {
+  0%, 58% { opacity: 0; }
+  59%, 90% { opacity: 1; }
+  91%, 100% { opacity: 0; }
+}
+
+.ps-spool {
+  position: absolute;
+  top: -12.5%;
+  left: 62%;
+  width: 22%;
+  animation: spin-slow 2.4s linear infinite;
+}
+
+/* el funko sale de abajo arriba sobre la cama (y = 280 de 340) */
+.ps-print {
+  position: absolute;
+  left: 21%;
+  width: 58%;
+  bottom: 17.6%;
+  animation: print-reveal var(--t) linear forwards;
+}
+
+/* líneas de capa sobre la pieza */
+.ps-print::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to top, rgba(255, 255, 255, 0.14) 0 2px, transparent 2px 5px);
+  pointer-events: none;
+  animation: layers-off var(--t) linear forwards;
+}
+
+/* 0–6 % cama vacía · 6–58 % imprime · 60–82 % terminado (salto y bocadillo)
+   · 82–92 % se retira · 92–100 % cama vacía y empieza la siguiente idea */
+@keyframes print-reveal {
+  0%, 6% { clip-path: inset(100% 0 0 0); opacity: 1; transform: none; }
+  58% { clip-path: inset(0 0 0 0); opacity: 1; transform: none; }
+  60%, 82% { clip-path: inset(-30% -30% 0 -30%); opacity: 1; transform: none; }
+  92%, 100% { clip-path: inset(-30% -30% 0 -30%); opacity: 0; transform: translateY(-18%) scale(0.7); }
+}
+
+@keyframes layers-off {
+  0%, 58% { opacity: 1; }
+  62%, 100% { opacity: 0; }
+}
+
+.ps-hop {
+  animation: print-hop var(--t) ease-in-out forwards;
+}
+
+@keyframes print-hop {
+  0%, 61% { transform: none; }
+  65% { transform: translateY(-14%); }
+  69% { transform: none; }
+  72% { transform: translateY(-5%); }
+  75%, 100% { transform: none; }
+}
+
+/* puente con el cabezal: su borde inferior es la altura de impresión */
+.ps-gantry {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  height: 10%;
+  bottom: 17.6%;
+  animation: gantry-rise var(--t) linear forwards;
+}
+
+@keyframes gantry-rise {
+  0%, 6% { bottom: 17.6%; }
+  58% { bottom: 74%; }
+  63%, 88% { bottom: 80%; }
+  100% { bottom: 17.6%; }
+}
+
+.ps-bar {
+  position: absolute;
+  inset: 12% 0 auto;
+  height: 30%;
+  border-radius: 4px;
+  background: #3b2d63;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.ps-head {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 19%;
+  left: 8%;
+  animation: head-sweep 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes head-sweep {
+  to { left: 73%; }
+}
+
+.ps-hot {
+  animation: hot 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes hot {
+  to { fill: var(--yellow); }
+}
+
+.ps-bubble {
+  position: absolute;
+  top: 9%;
+  right: 5%;
+  max-width: 44%;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  background: var(--ink);
+  color: var(--cream);
+  font-weight: 800;
+  font-size: clamp(0.78rem, 1.5vw, 1rem);
+  line-height: 1.25;
+  border-radius: 16px 16px 16px 4px;
+  transform-origin: 0 100%;
+  opacity: 0;
+  animation: ps-bubble var(--t) ease-out forwards;
+}
+
+.ps-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 14px;
+  width: 14px;
+  height: 14px;
+  background: var(--ink);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+@keyframes ps-bubble {
+  0%, 62% { opacity: 0; transform: scale(0.4); }
+  66% { opacity: 1; transform: scale(1.06); }
+  68%, 84% { opacity: 1; transform: none; }
+  88%, 100% { opacity: 0; transform: scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps *,
+  .ps-print::after {
+    animation: none !important;
+  }
+  .ps-print { clip-path: none; }
+  .ps-print::after,
+  .ps-screen--busy { opacity: 0; }
+  .ps-gantry { bottom: 80%; }
+  .ps-screen--done,
+  .ps-bubble { opacity: 1; }
+}
+
 /* ---------- accesibilidad ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .rise,
-  .funko-idle {
+  .funko-idle,
+  [data-reveal].is-in,
+  .step.is-in .n,
+  .step.is-in .bubble,
+  .hero-star,
+  .hero-float,
+  .sparkle,
+  .tile .flag,
+  .tile:hover .go b,
+  .nudge,
+  .wa-dock::after,
+  .faq[open] p,
+  .swap-in,
+  .bump,
+  .foot-logo {
     animation: none;
     opacity: 1;
   }

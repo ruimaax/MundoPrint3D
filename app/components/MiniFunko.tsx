@@ -62,6 +62,33 @@ export default function MiniFunko({ variant, className }: { variant: FunkoVarian
     );
   }
 
+  // Nazareno: capirote alto que cae sobre los hombros (como el de verdad),
+  // túnica acampanada con cordón, escudo de la hermandad y vela encendida.
+  if (variant === "nazareno") {
+    return (
+      <svg viewBox="0 0 120 132" className={className} aria-hidden>
+        <ellipse cx="60" cy="127" rx="36" ry="5" fill="rgba(25,20,48,0.1)" />
+        {/* túnica */}
+        <path d="M38 72 H82 L94 126 H26 Z" fill={shirt} stroke={INK} strokeWidth="4" strokeLinejoin="round" />
+        <path d="M32 104 H88" stroke="#fff6ea" strokeWidth="4" strokeLinecap="round" />
+        <path d="M44 104 v14" stroke="#fff6ea" strokeWidth="3" strokeLinecap="round" />
+        {/* brazo con la vela */}
+        <rect x="84" y="82" width="12" height="22" rx="6" fill={shirt} stroke={INK} strokeWidth="4" />
+        <rect x="93" y="52" width="9" height="46" rx="2.5" fill="#fff6ea" stroke={INK} strokeWidth="3.5" />
+        <path d="M97.5 38 C92 45 93 51 97.5 52 C102 51 103 45 97.5 38 Z" fill="#fb923c" stroke={INK} strokeWidth="2" />
+        <path d="M97.5 44 C96 47 96.5 49.5 97.5 50 C98.5 49.5 99 47 97.5 44 Z" fill="#fde68a" />
+        {/* capirote y antifaz en una sola pieza */}
+        <path d="M60 2 L92 80 Q60 90 28 80 Z" fill={shirt} stroke={INK} strokeWidth="4" strokeLinejoin="round" />
+        <circle cx="60" cy="74" r="5.5" fill="#ffc400" stroke={INK} strokeWidth="2.5" />
+        {/* rendijas de los ojos */}
+        <ellipse cx="51" cy="52" rx="5.5" ry="3.6" fill={INK} />
+        <ellipse cx="69" cy="52" rx="5.5" ry="3.6" fill={INK} />
+        <circle data-eye cx="51" cy="52" r="1.8" fill="#fff6ea" />
+        <circle data-eye cx="69" cy="52" r="1.8" fill="#fff6ea" />
+      </svg>
+    );
+  }
+
   // Funko de perro: cabeza grande con orejas, cuerpo pequeño y rabo.
   if (variant === "perro") {
     return (
@@ -137,10 +164,6 @@ export default function MiniFunko({ variant, className }: { variant: FunkoVarian
         ) : null}
         <rect x="38" y="76" width="44" height="32" rx="10" fill="none" stroke={INK} strokeWidth="4" />
 
-        {/* túnica de nazareno */}
-        {variant === "nazareno" ? (
-          <path d="M36 78 h48 l8 48 h-64 Z" fill={shirt} stroke={INK} strokeWidth="4" strokeLinejoin="round" />
-        ) : null}
 
         {/* vestido de flamenca */}
         {variant === "flamenca" ? (
@@ -185,8 +208,6 @@ export default function MiniFunko({ variant, className }: { variant: FunkoVarian
             <ellipse cx="58" cy="17" rx="28" ry="11" fill="#ec4899" stroke={INK} strokeWidth="4" />
             <rect x="54" y="2" width="8" height="8" rx="3.5" fill={INK} />
           </>
-        ) : variant === "nazareno" ? (
-          <path d="M60 1 L93 45 L27 45 Z" fill={shirt} stroke={INK} strokeWidth="4" strokeLinejoin="round" />
         ) : (
           <>
             <path d="M30 38 C30 20 42 12 60 12 C78 12 90 20 90 38 C82 30 72 28 60 28 C48 28 38 30 30 38 Z" fill={INK} />

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import FunkoEyes from "../components/FunkoEyes";
 import { FunkoGuide } from "../components/MiniFunko";
+import ScrollReveal from "../components/ScrollReveal";
+import SiteFooter from "../components/SiteFooter";
 import SiteNav from "../components/SiteNav";
 import WhatsAppDock from "../components/WhatsAppDock";
 import WorksGrid from "../components/WorksGrid";
@@ -16,8 +18,9 @@ export default function GaleriaPage() {
   const items = getGallery();
 
   return (
-    <main className="min-h-screen">
+    <main id="top" className="min-h-screen">
       <FunkoEyes />
+      <ScrollReveal />
       <SiteNav />
 
       <section className="field-blue px-5 pb-12 pt-24 sm:px-8 sm:pt-28">
@@ -61,12 +64,7 @@ export default function GaleriaPage() {
         </div>
       </section>
 
-      <footer className="bg-toy-ink px-5 py-10 text-center text-white sm:px-8">
-        <p className="display text-3xl">Tu mundo, impreso en 3D</p>
-        <p className="mt-3 text-sm font-medium text-white/55">
-          Mundo Print 3D · España · © {new Date().getFullYear()}
-        </p>
-      </footer>
+      <SiteFooter />
 
       <WhatsAppDock />
     </main>
