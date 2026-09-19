@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mundoprint3d",
+  "compatibility_date": "2026-09-18",
+  // Web estática: se sirve la carpeta que genera `npm run build`.
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
