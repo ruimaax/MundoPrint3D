@@ -1,4 +1,6 @@
-import { categories } from "../data/products";
+"use client";
+
+import { useCatalog } from "../data/useCatalog";
 import { PHONE, WA_DEFAULT } from "../data/contact";
 
 const NAV = [
@@ -23,6 +25,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 // Pie de página: bloque oscuro a todo el ancho con cuatro columnas, la marca en gigante y
 // una línea final con el copyright.
 export default function SiteFooter() {
+  const { sections } = useCatalog();
   return (
     <footer className="foot text-white">
       <div className="foot-stripe" aria-hidden />
@@ -70,7 +73,7 @@ export default function SiteFooter() {
             <nav aria-label="Catálogo">
               <p className="foot-head">Catálogo</p>
               <ul className="mt-5 grid gap-3">
-                {categories.slice(0, 5).map((c) => (
+                {sections.slice(0, 5).map((c) => (
                   <li key={c.id}>
                     <a className="foot-link" href="/#catalogo">
                       {c.title}
@@ -118,8 +121,20 @@ export default function SiteFooter() {
             <p className="text-sm font-medium text-white/60">
               © {new Date().getFullYear()} Mundo Print 3D · España. Hecho a mano, capa a capa.
             </p>
-            <p className="text-sm font-medium text-white/45">
-              Funkos personalizados · Mascotas · Semana Santa · Selección
+            <p className="mt-1 text-sm font-semibold text-white/70">
+              Hecho por{" "}
+              <a
+                href="https://www.foilestudio.com"
+                target="_blank"
+                rel="noopener"
+                className="foil-credit"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden>
+                  <path d="M10 0 C11 7 13 9 20 10 C13 11 11 13 10 20 C9 13 7 11 0 10 C7 9 9 7 10 0 Z" />
+                </svg>
+                <span className="foil-name">FoilEstudio</span>
+                <span className="foil-tag">Estudio digital</span>
+              </a>
             </p>
             <div className="mt-2 flex flex-wrap justify-center gap-6 text-xs font-bold uppercase tracking-[0.14em] text-white/60">
               <a className="hover:text-toy-yellow" href="/galeria">Vitrina</a>

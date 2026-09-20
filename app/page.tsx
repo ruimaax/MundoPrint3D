@@ -1,7 +1,7 @@
 import BudgetForm from "./components/BudgetForm";
 import FunkoEyes from "./components/FunkoEyes";
 import MiniFunko, { FunkoGuide } from "./components/MiniFunko";
-import PrintScene from "./components/PrintScene";
+import PrintScene, { HeroIdeaProvider, HeroTitle } from "./components/PrintScene";
 import ProductWall from "./components/ProductWall";
 import ScrollReveal from "./components/ScrollReveal";
 import SiteFooter from "./components/SiteFooter";
@@ -9,7 +9,6 @@ import SiteNav from "./components/SiteNav";
 import WhatsAppDock from "./components/WhatsAppDock";
 import WorksGrid from "./components/WorksGrid";
 import { WA_DEFAULT } from "./data/contact";
-import { getHomeGallery } from "./data/gallery";
 
 const steps = [
   {
@@ -95,8 +94,6 @@ const SKY: [number, number, number, number, number][] = [
 ];
 
 export default function Page() {
-  const works = getHomeGallery().slice(0, 6);
-
   return (
     <main id="top" className="min-h-screen">
       <FunkoEyes />
@@ -122,17 +119,14 @@ export default function Page() {
             />
           ))}
         </div>
+        <HeroIdeaProvider>
         <div className="mx-auto grid max-w-shell items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="relative z-10">
             <p className="kicker rise text-toy-yellow">Taller de impresión 3D · España</p>
-            <h1
-              className="display display--tight rise mt-5 text-[15vw] leading-[0.82] sm:text-7xl lg:text-8xl"
+            <HeroTitle
+              className="display display--tight rise mt-5 text-[13vw] leading-[0.82] sm:text-7xl lg:text-8xl"
               style={{ "--rise-delay": "70ms" } as React.CSSProperties}
-            >
-              Tú, hecho
-              <br />
-              figura
-            </h1>
+            />
             <p
               className="rise mt-6 max-w-md text-lg font-medium leading-7 text-white/85"
               style={{ "--rise-delay": "150ms" } as React.CSSProperties}
@@ -173,6 +167,8 @@ export default function Page() {
             </div>
           </div>
         </div>
+
+        </HeroIdeaProvider>
 
         {/* mascota que asoma por abajo */}
         <div className="peek pointer-events-none absolute -bottom-1 left-4 hidden items-end gap-3 sm:flex">
@@ -265,7 +261,7 @@ export default function Page() {
           </div>
 
           <div className="mt-9">
-            <WorksGrid items={works} />
+            <WorksGrid />
           </div>
         </div>
       </section>

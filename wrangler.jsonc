@@ -2,9 +2,19 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mundoprint3d",
   "compatibility_date": "2026-09-18",
-  // Web estática: se sirve la carpeta que genera `npm run build`.
+  // Worker con la API del panel (/admin); el resto es la web estática.
+  "main": "worker/index.ts",
   "assets": {
     "directory": "./out",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Estas rutas pasan primero por el worker; todo lo demás es estático.
+    "run_worker_first": ["/api/*", "/admin/api/*", "/img/*"]
+  },
+  // Catálogo (catalog.json) e imágenes subidas desde el panel.
+  "kv_namespaces": [
+    { "binding": "STORE", "id": "a7caf0ddfc7d45b6914834618de28e7c" }
+  ],
+  // La contraseña del panel NO va aquí: se guarda como secreto con
+  //   npx wrangler secret put ADMIN_PASSWORD
 }

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf:dev": "NEXT_DIST_DIR=.next-cf next build && npx wrangler dev --assets .next-cf"
   },
   "engines": {
     "node": ">=18.17 <23"

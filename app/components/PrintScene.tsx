@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import MiniFunko, { type FunkoVariant } from "./MiniFunko";
 
 const INK = "#191430";
 
 // Cada vuelta de impresión enseña una idea distinta y el funko que sale de ella.
-const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.ReactNode }[] = [
+// `title` es lo que dice el titular del hero mientras se imprime esa idea.
+const IDEAS: { id: string; label: string; title: string; funko: FunkoVariant; photo: React.ReactNode }[] = [
   {
     id: "persona",
+    title: "Tú",
     label: "Tú",
     funko: "gamer",
     photo: (
@@ -30,6 +32,7 @@ const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.Reac
   },
   {
     id: "perro",
+    title: "Tu perro",
     label: "Tu perro",
     funko: "perro",
     photo: (
@@ -51,6 +54,7 @@ const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.Reac
   },
   {
     id: "nazareno",
+    title: "Tu nazareno",
     label: "Tu hermandad",
     funko: "nazareno",
     photo: (
@@ -69,6 +73,7 @@ const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.Reac
   },
   {
     id: "futbolista",
+    title: "Tu jugador",
     label: "Tu jugador",
     funko: "futbolista",
     photo: (
@@ -91,6 +96,32 @@ const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.Reac
   },
 ];
 
+// El titular del hero y la escena comparten la idea que se está imprimiendo.
+const IdeaContext = createContext<{ idx: number; setIdx: React.Dispatch<React.SetStateAction<number>> }>({
+  idx: 0,
+  setIdx: () => {},
+});
+
+export function HeroIdeaProvider({ children }: { children: React.ReactNode }) {
+  const [idx, setIdx] = useState(0);
+  return <IdeaContext.Provider value={{ idx, setIdx }}>{children}</IdeaContext.Provider>;
+}
+
+// Titular que cambia con la idea: "Tú, hecho figura" → "Tu perro, hecho figura"…
+export function HeroTitle({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  const { idx } = useContext(IdeaContext);
+  const idea = IDEAS[idx];
+  return (
+    <h1 className={className} style={style}>
+      <span key={idea.id} className="hero-who">
+        {idea.title},
+      </span>
+      <br />
+      hecho figura
+    </h1>
+  );
+}
+
 // Escena del hero: la idea del cliente (una persona, su perro, un nazareno,
 // un jugador…) → la impresora 3D imprime su funko capa a capa → el funko da
 // un salto, pregunta si hacemos el tuyo y se retira; entonces cambia la idea
@@ -99,7 +130,7 @@ const IDEAS: { id: string; label: string; funko: FunkoVariant; photo: React.Reac
 // idea y el `key` reinicia las piezas animadas. Con movimiento reducido no hay
 // animación y se queda la primera idea ya impresa.
 export default function PrintScene() {
-  const [idx, setIdx] = useState(0);
+  const { idx, setIdx } = useContext(IdeaContext);
   const idea = IDEAS[idx];
 
   const next = (e: React.AnimationEvent) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { categories } from "../data/products";
+import { useCatalog } from "../data/useCatalog";
 import { waLink } from "../data/contact";
 
 // Formulario de pedido: compone el mensaje y lo abre en WhatsApp, donde se
@@ -10,12 +10,16 @@ import { waLink } from "../data/contact";
 // Tipos que son figuras: para ellos se muestran las preguntas de funko.
 const FUNKO_IDS = ["funko-personalizado", "funko-seleccion", "funko-semanasanta", "mascota"];
 
-// Las categorías del catálogo más "Otro", para ideas que aún no están en él.
-const OPTIONS = [...categories, { id: "otro", title: "Otro", orderTitle: "Algo que no está en el catálogo" }];
+// Las secciones del catálogo (editables desde /admin) más "Otro", para ideas
+// que aún no están en él.
+const OTRO = { id: "otro", title: "Otro", order: "Algo que no está en el catálogo" };
 
 export default function BudgetForm() {
+  const { sections } = useCatalog();
+  const OPTIONS = [...sections.map((s) => ({ id: s.id, title: s.title, order: s.title })), OTRO];
+
   const [name, setName] = useState("");
-  const [typeId, setTypeId] = useState(categories[0].id);
+  const [typeId, setTypeId] = useState(OPTIONS[0].id);
 
   const [figures, setFigures] = useState(1);
   const [who, setWho] = useState("");
@@ -46,7 +50,7 @@ export default function BudgetForm() {
       "¡Hola! Quiero pedir presupuesto desde la web.",
       name.trim() && `Soy ${name.trim()}.`,
       "",
-      `*Quiero:* ${type.orderTitle}`,
+      `*Quiero:* ${type.order}`,
       isFunko && `*Figuras:* ${figures}`,
       typeId === "mascota" && pet.trim() && `*Mascota:* ${pet.trim()}`,
       typeId === "funko-semanasanta" && `*Figura:* ${role}`,

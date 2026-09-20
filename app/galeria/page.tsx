@@ -6,7 +6,6 @@ import SiteFooter from "../components/SiteFooter";
 import SiteNav from "../components/SiteNav";
 import WhatsAppDock from "../components/WhatsAppDock";
 import WorksGrid from "../components/WorksGrid";
-import { getGallery } from "../data/gallery";
 
 export const metadata: Metadata = {
   title: "La vitrina — Mundo Print 3D",
@@ -15,8 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default function GaleriaPage() {
-  const items = getGallery();
-
   return (
     <main id="top" className="min-h-screen">
       <FunkoEyes />
@@ -27,7 +24,7 @@ export default function GaleriaPage() {
         <div className="mx-auto max-w-shell">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
-              <p className="kicker rise text-toy-yellow">La vitrina · {items.length} piezas</p>
+              <p className="kicker rise text-toy-yellow">La vitrina</p>
               <h1
                 className="display rise mt-3 text-5xl sm:text-7xl"
                 style={{ "--rise-delay": "70ms" } as React.CSSProperties}
@@ -51,7 +48,7 @@ export default function GaleriaPage() {
 
       <section className="px-5 py-14 sm:px-8">
         <div className="mx-auto max-w-shell">
-          <WorksGrid items={items} filterable />
+          <WorksGrid filterable />
 
           <div className="mt-14 flex flex-wrap justify-center gap-4">
             <a className="btn btn-red text-lg" href="/#pedido">
