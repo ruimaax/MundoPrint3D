@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { inkOn } from "../data/catalog";
 import { useCatalog } from "../data/useCatalog";
 import { waLink } from "../data/contact";
 
@@ -12,11 +13,14 @@ const FUNKO_IDS = ["funko-personalizado", "funko-seleccion", "funko-semanasanta"
 
 // Las secciones del catálogo (editables desde /admin) más "Otro", para ideas
 // que aún no están en él.
-const OTRO = { id: "otro", title: "Otro", order: "Algo que no está en el catálogo" };
+const OTRO = { id: "otro", title: "Otro", order: "Algo que no está en el catálogo", color: "#201436" };
 
 export default function BudgetForm() {
   const { sections } = useCatalog();
-  const OPTIONS = [...sections.map((s) => ({ id: s.id, title: s.title, order: s.title })), OTRO];
+  const OPTIONS = [
+    ...sections.map((s) => ({ id: s.id, title: s.title, order: s.title, color: s.color })),
+    OTRO,
+  ];
 
   const [name, setName] = useState("");
   const [typeId, setTypeId] = useState(OPTIONS[0].id);
@@ -70,7 +74,7 @@ export default function BudgetForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-8">
+    <form onSubmit={handleSubmit} className="order-form grid gap-7">
       {/* 1 · Qué quieres */}
       <fieldset className="grid gap-5">
         <legend className="form-step">
@@ -81,11 +85,17 @@ export default function BudgetForm() {
             <button
               key={cat.id}
               type="button"
-              className="chip"
+              className="pick"
               data-active={cat.id === typeId}
               aria-pressed={cat.id === typeId}
               onClick={() => setTypeId(cat.id)}
+              style={
+                cat.id === typeId
+                  ? ({ background: cat.color, color: inkOn(cat.color), "--dot": inkOn(cat.color) } as React.CSSProperties)
+                  : ({ "--dot": cat.color } as React.CSSProperties)
+              }
             >
+              <span className="pick-dot" aria-hidden />
               {cat.title}
             </button>
           ))}
@@ -238,20 +248,29 @@ export default function BudgetForm() {
                 onChange={(e) => setDate(e.target.value)}
               />
             </label>
-            <label className="check mt-2">
-              <input type="checkbox" checked={noRush} onChange={(e) => setNoRush(e.target.checked)} />
-              Sin prisa
-            </label>
+            <button
+              type="button"
+              className="pick mt-2.5"
+              data-active={noRush}
+              aria-pressed={noRush}
+              onClick={() => setNoRush((v) => !v)}
+            >
+              {noRush ? "✓ " : ""}Sin prisa
+            </button>
           </div>
         </div>
       </fieldset>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <button type="submit" className="btn btn-green text-lg">
+      <div className="send-row">
+        <button type="submit" className="btn btn-green send-btn text-lg">
+          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.2-.7l.5-.6c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.6Z" />
+          </svg>
           Enviar por WhatsApp
         </button>
-        <p className="text-sm font-semibold text-toy-ink/60">
-          Sin compromiso · Respuesta en 24–48 h
+        <p className="text-sm font-semibold leading-5 text-toy-ink/60">
+          Sin compromiso
+          <br className="hidden sm:block" /> Respuesta en 24–48 h
         </p>
       </div>
     </form>
