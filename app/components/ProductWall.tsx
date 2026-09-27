@@ -31,10 +31,10 @@ export default function ProductWall() {
             {cover && <img src={cover} alt={section.title} loading={i > 1 ? "lazy" : undefined} />}
             <span className="veil" />
             <span className="cap">
-              <h3 className={span === "big" ? "text-4xl sm:text-5xl" : "text-2xl"}>{section.title}</h3>
+              <h3 className={span === "big" ? "text-4xl sm:text-5xl" : "text-xl sm:text-2xl"}>{section.title}</h3>
               {span && section.description && <p className="max-w-sm">{section.description}</p>}
               <span className="go">
-                Pedir por WhatsApp <b aria-hidden>→</b>
+                Pedir<span className={span ? "" : "max-[719px]:hidden"}> por WhatsApp</span> <b aria-hidden>→</b>
               </span>
             </span>
           </a>

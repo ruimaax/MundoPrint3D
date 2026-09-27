@@ -23,7 +23,39 @@ export type Section = {
   /** Etiqueta pequeña sobre la tarjeta ("El más pedido"). */
   tagline?: string;
   photos: Photo[];
+  /** Paso 2 del formulario de pedido. Si falta, se usa formOf(). */
+  form?: SectionForm;
 };
+
+// Preguntas del formulario de pedido, editables por sección desde /admin.
+//   short  → una línea de texto
+//   long   → texto largo
+//   choice → desplegable con opciones
+//   count  → número con botones − y + (p. ej. nº de figuras)
+export type QuestionKind = "short" | "long" | "choice" | "count";
+
+export type Question = {
+  id: string;
+  kind: QuestionKind;
+  label: string;
+  placeholder?: string;
+  /** Solo para "choice". */
+  options?: string[];
+  required?: boolean;
+};
+
+export type SectionForm = {
+  /** Título del paso 2 ("Tu figura", "Tu idea"…). */
+  title: string;
+  questions: Question[];
+};
+
+export const QUESTION_KINDS: { kind: QuestionKind; label: string }[] = [
+  { kind: "short", label: "Texto corto" },
+  { kind: "long", label: "Texto largo" },
+  { kind: "choice", label: "Desplegable" },
+  { kind: "count", label: "Número" },
+];
 
 export type Catalog = {
   sections: Section[];
@@ -81,6 +113,83 @@ export function inkOn(color: string): string {
   const n = parseInt(color.slice(1), 16);
   const lum = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
   return lum > 160 ? "#201436" : "#ffffff";
+}
+
+// Formulario de cada sección. Las que aún no se han tocado en el panel usan
+// las preguntas de siempre (las de funko para las figuras, "tu idea" para el
+// resto), así el formulario no cambia hasta que el cliente lo edite.
+const FIGURES: Question = { id: "figuras", kind: "count", label: "Nº de figuras" };
+const LOOKS: Question = {
+  id: "como-es",
+  kind: "long",
+  label: "Cómo es y qué lleva puesto",
+  placeholder:
+    "Pelo, barba, gafas, tatuajes, ropa (uniforme de trabajo, camiseta de su equipo, disfraz…) y lo que lleve en las manos",
+};
+
+const DEFAULT_FORMS: Record<string, SectionForm> = {
+  "funko-personalizado": { title: "Tu figura", questions: [FIGURES, LOOKS] },
+  "funko-seleccion": {
+    title: "Tu figura",
+    questions: [
+      FIGURES,
+      {
+        id: "jugador",
+        kind: "short",
+        label: "Jugador(es)",
+        placeholder: "Nombre y dorsal, o tu nombre con la camiseta de la Selección",
+      },
+      LOOKS,
+    ],
+  },
+  "funko-semanasanta": {
+    title: "Tu figura",
+    questions: [
+      FIGURES,
+      {
+        id: "figura",
+        kind: "choice",
+        label: "Figura",
+        options: ["Nazareno", "Costalero", "Capataz", "Monaguillo / acólito", "Mantilla", "Músico de banda", "Otra"],
+      },
+      { id: "hermandad", kind: "short", label: "Hermandad / cofradía", placeholder: "Nombre y localidad" },
+      LOOKS,
+    ],
+  },
+  mascota: {
+    title: "Tu figura",
+    questions: [
+      FIGURES,
+      {
+        id: "mascota",
+        kind: "short",
+        label: "Tu mascota",
+        placeholder: "Especie, raza y nombre. Ej.: perro, bodeguero, se llama Rocky",
+      },
+      {
+        id: "como-es",
+        kind: "long",
+        label: "Cómo es",
+        placeholder: "Color del pelo, manchas, collar, si lleva pañuelo o algo que le identifique…",
+      },
+    ],
+  },
+};
+
+export const GENERIC_FORM: SectionForm = {
+  title: "Tu idea",
+  questions: [
+    {
+      id: "idea",
+      kind: "long",
+      label: "Cuéntanos qué necesitas",
+      placeholder: "Qué es, medidas aproximadas, colores, cuántas unidades, texto o logo que deba llevar…",
+    },
+  ],
+};
+
+export function formOf(section: Pick<Section, "id" | "form">): SectionForm {
+  return section.form ?? DEFAULT_FORMS[section.id] ?? GENERIC_FORM;
 }
 
 export function coverOf(section: Section): string | undefined {

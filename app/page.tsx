@@ -106,7 +106,7 @@ export default function Page() {
           {SKY.map(([x, y, size, delay, dur], i) => (
             <Sparkle
               key={i}
-              className="text-white"
+              className={`text-white ${i % 3 ? "max-sm:hidden" : ""}`}
               delay={`${delay}s`}
               style={{
                 left: `${x}%`,
@@ -139,10 +139,10 @@ export default function Page() {
               className="rise mt-8 flex flex-wrap gap-3"
               style={{ "--rise-delay": "230ms" } as React.CSSProperties}
             >
-              <a href="#catalogo" className="btn btn-yellow text-lg">
+              <a href="#catalogo" className="btn btn-yellow grow text-lg sm:grow-0">
                 Ver el catálogo
               </a>
-              <a href="#pedido" className="btn btn-ghost text-lg text-white">
+              <a href="#pedido" className="btn btn-ghost grow text-lg text-white sm:grow-0">
                 Pedir el mío
               </a>
             </div>
@@ -206,7 +206,7 @@ export default function Page() {
             De tu foto a tu figura, <span className="text-toy-yellow">te lo cuentan ellos</span>
           </h2>
 
-          <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-3">
+          <div className="mt-10 grid gap-x-8 gap-y-10 sm:mt-12 sm:gap-y-12 md:grid-cols-3">
             {steps.map((step, i) => (
               <article
                 key={step.n}
@@ -226,13 +226,18 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center gap-x-12 gap-y-6">
+          <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-7 sm:mt-14 sm:flex sm:flex-wrap sm:items-center sm:gap-x-12">
             {[
               ["24–48 h", "para darte precio y fecha"],
               ["Desde 1 unidad", "o una serie entera, tú decides"],
               ["Diseño propio", "cada pieza se modela para ti"],
             ].map(([value, label], i) => (
-              <div key={value} data-reveal="pop" style={{ "--i": i } as React.CSSProperties}>
+              <div
+                key={value}
+                data-reveal="pop"
+                className={i === 0 ? "col-span-2" : ""}
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <p className="display text-3xl text-toy-yellow">{value}</p>
                 <p className="mt-1 text-sm font-medium text-white/80">{label}</p>
               </div>
@@ -307,20 +312,20 @@ export default function Page() {
               Rellenas esto y se abre WhatsApp con todo escrito. Ahí cerramos
               precio y fecha. Más fácil imposible.
             </p>
-            <FunkoGuide variant="repartidor" className="mt-8">
+            <FunkoGuide variant="repartidor" className="mt-8 max-lg:hidden">
               En cuanto esté, ¡sale para tu casa!
             </FunkoGuide>
             <a
               href={WA_DEFAULT}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-green mt-8"
+              className="btn btn-green mt-7 max-sm:w-full lg:mt-8"
             >
               O escríbenos directamente
             </a>
           </div>
 
-          <div data-reveal="pop" style={{ "--i": 2 } as React.CSSProperties} className="rounded-[24px] bg-toy-cream p-6 text-toy-ink shadow-[0_30px_60px_-24px_rgba(0,0,0,0.6)] sm:p-9">
+          <div data-reveal="pop" style={{ "--i": 2 } as React.CSSProperties} className="-mx-1 rounded-[24px] bg-toy-cream p-5 text-toy-ink shadow-[0_30px_60px_-24px_rgba(0,0,0,0.6)] sm:mx-0 sm:p-9">
             <BudgetForm />
           </div>
         </div>

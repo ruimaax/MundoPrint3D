@@ -14,7 +14,15 @@
 // tarjeta). Si el catálogo aún no existe se usa la semilla de
 // app/data/catalog.ts.
 
-import { SEED_CATALOG, type Catalog, type Photo, type Section } from "../app/data/catalog";
+import {
+  SEED_CATALOG,
+  type Catalog,
+  type Photo,
+  type Question,
+  type QuestionKind,
+  type Section,
+  type SectionForm,
+} from "../app/data/catalog";
 
 // --- tipos mínimos de Cloudflare (sin dependencias extra) ---
 interface KVNamespace {
@@ -192,6 +200,13 @@ function validateCatalog(input: unknown): Catalog | null {
       photos.push({ id: pid, src, ...(ptitle ? { title: ptitle } : {}) });
     }
 
+    let form: SectionForm | undefined;
+    if (o.form !== undefined && o.form !== null) {
+      const f = validateForm(o.form);
+      if (!f) return null;
+      form = f;
+    }
+
     sections.push({
       id,
       title,
@@ -200,9 +215,53 @@ function validateCatalog(input: unknown): Catalog | null {
       ...(description ? { description } : {}),
       ...(tagline ? { tagline } : {}),
       photos,
+      ...(form ? { form } : {}),
     });
   }
   return { sections };
+}
+
+const KINDS: QuestionKind[] = ["short", "long", "choice", "count"];
+
+function validateForm(input: unknown): SectionForm | null {
+  if (!input || typeof input !== "object") return null;
+  const o = input as Record<string, unknown>;
+  const title = str(o.title, 40, true);
+  if (!title || !Array.isArray(o.questions) || o.questions.length > 15) return null;
+
+  const ids = new Set<string>();
+  const questions: Question[] = [];
+  for (const q of o.questions) {
+    if (!q || typeof q !== "object") return null;
+    const qo = q as Record<string, unknown>;
+    const id = typeof qo.id === "string" && ID_RE.test(qo.id) ? qo.id : null;
+    const kind = KINDS.includes(qo.kind as QuestionKind) ? (qo.kind as QuestionKind) : null;
+    const label = str(qo.label, 60, true);
+    const placeholder = str(qo.placeholder, 200);
+    if (!id || ids.has(id) || !kind || !label || placeholder === null) return null;
+    ids.add(id);
+
+    let options: string[] | undefined;
+    if (kind === "choice") {
+      if (!Array.isArray(qo.options) || qo.options.length === 0 || qo.options.length > 20) return null;
+      options = [];
+      for (const opt of qo.options) {
+        const t = str(opt, 60, true);
+        if (!t) return null;
+        options.push(t);
+      }
+    }
+
+    questions.push({
+      id,
+      kind,
+      label,
+      ...(placeholder && (kind === "short" || kind === "long") ? { placeholder } : {}),
+      ...(options ? { options } : {}),
+      ...(qo.required === true && (kind === "short" || kind === "long") ? { required: true } : {}),
+    });
+  }
+  return { title, questions };
 }
 
 // --- acceso al panel: contraseña propia ---

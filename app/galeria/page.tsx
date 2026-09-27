@@ -50,11 +50,11 @@ export default function GaleriaPage() {
         <div className="mx-auto max-w-shell">
           <WorksGrid filterable />
 
-          <div className="mt-14 flex flex-wrap justify-center gap-4">
-            <a className="btn btn-red text-lg" href="/#pedido">
+          <div className="mt-12 flex flex-wrap justify-center gap-3 sm:mt-14 sm:gap-4">
+            <a className="btn btn-red text-lg max-sm:w-full" href="/#pedido">
               Pedir el mío
             </a>
-            <a className="btn btn-ink text-lg" href="/">
+            <a className="btn btn-ink text-lg max-sm:w-full" href="/">
               ← Volver a la tienda
             </a>
           </div>

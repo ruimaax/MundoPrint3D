@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Anton, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 
@@ -42,6 +42,11 @@ export const metadata: Metadata = {
     icon: "/brand/mundo-print-3d-logo.png",
     apple: "/brand/mundo-print-3d-logo.png",
   },
+};
+
+// Color de la barra del navegador en el móvil: el mismo papel que la cabecera.
+export const viewport: Viewport = {
+  themeColor: "#f7ede0",
 };
 
 export default function RootLayout({

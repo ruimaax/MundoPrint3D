@@ -22,7 +22,7 @@ export default function WorksGrid({ filterable = false }: { filterable?: boolean
   return (
     <div>
       {filterable && (
-        <div className="mb-9 flex flex-wrap gap-2.5">
+        <div className="chip-row mb-8 sm:mb-9">
           {sections.map((title) => (
             <button
               key={title}

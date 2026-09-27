@@ -35,6 +35,13 @@
 
 html {
   scroll-padding-top: 4.5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+a,
+button,
+summary {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -122,13 +129,15 @@ img {
   transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
+@media (hover: hover) {
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+  }
 }
 
 .btn:active {
-  transform: translateY(0);
+  transform: scale(0.97);
 }
 
 .btn-red { background: var(--red); color: white; }
@@ -191,7 +200,36 @@ img {
 .wall {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-auto-rows: 12.5rem;
+  gap: 0.75rem;
+}
+
+/* móvil: la primera a lo ancho y en grande; si la última se queda sola en
+   su fila, también a lo ancho */
+@media (max-width: 719px) {
+  .wall .big {
+    grid-column: 1 / -1;
+    grid-row: span 2;
+  }
+  .wall .tile:last-child:nth-child(even) {
+    grid-column: 1 / -1;
+  }
+  .tile .cap {
+    padding: 0.8rem 0.9rem;
+  }
+  /* las portadas llevan texto propio: en pequeño el velo sube más para que
+     el título se lea bien */
+  .tile .veil {
+    background: linear-gradient(
+      to top,
+      rgba(32, 20, 54, 0.92) 0%,
+      rgba(32, 20, 54, 0.55) 38%,
+      transparent 70%
+    );
+  }
+  .tile .cap .go {
+    margin-top: 0.4rem;
+  }
 }
 
 @media (min-width: 720px) {
@@ -222,9 +260,16 @@ img {
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
-.tile:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lift);
+@media (hover: hover) {
+  .tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+.tile:active,
+.shot:active {
+  transform: scale(0.98);
 }
 
 .tile img {
@@ -236,8 +281,10 @@ img {
   transition: transform 0.4s ease;
 }
 
-.tile:hover img {
-  transform: scale(1.05);
+@media (hover: hover) {
+  .tile:hover img {
+    transform: scale(1.05);
+  }
 }
 
 .tile .veil {
@@ -395,6 +442,12 @@ img {
   gap: 1rem;
 }
 
+@media (max-width: 719px) {
+  .shots {
+    gap: 0.75rem;
+  }
+}
+
 @media (min-width: 720px) {
   .shots {
     grid-template-columns: repeat(3, 1fr);
@@ -411,9 +464,11 @@ img {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.shot:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lift);
+@media (hover: hover) {
+  .shot:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
 }
 
 .shot img {
@@ -431,6 +486,7 @@ img {
 }
 
 .shot .name {
+  max-width: 100%;
   font-family: var(--font-display), sans-serif;
   font-weight: 400;
   text-transform: uppercase;
@@ -448,6 +504,19 @@ img {
   padding: 0.24rem 0.6rem;
   border-radius: 999px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* en dos columnas no caben nombre y etiqueta en línea: uno encima del otro */
+@media (max-width: 719px) {
+  .shot figcaption {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.6rem 0.7rem 0.7rem;
+  }
 }
 
 /* ---------- chips de filtro ---------- */
@@ -464,8 +533,42 @@ img {
   transition: all 0.14s ease;
 }
 
-.chip:hover {
-  box-shadow: inset 0 0 0 2px var(--ink);
+@media (hover: hover) {
+  .chip:hover {
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+}
+
+/* fila de chips que en móvil se desliza de lado en vez de apilarse */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chip-row .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: -1.25rem;
+    padding: 0.25rem 1.25rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 1.25rem;
+  }
+  .chip-row::-webkit-scrollbar {
+    display: none;
+  }
+  .chip-row .chip {
+    scroll-snap-align: start;
+    padding: 0.6rem 1.1rem;
+  }
 }
 
 .chip[data-active="true"] {
@@ -626,9 +729,55 @@ select.input {
   transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
 }
 
-.pick:hover {
-  transform: translateY(-1px);
-  box-shadow: inset 0 0 0 2px var(--ink);
+@media (hover: hover) {
+  .pick:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+}
+
+.pick:active {
+  transform: scale(0.97);
+}
+
+/* opciones del paso 1: en móvil, rejilla de dos columnas en vez de una
+   lista larguísima de píldoras */
+.pick-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 639px) {
+  .pick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pick-grid .pick {
+    min-height: 3.1rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 14px;
+    font-size: 0.84rem;
+    line-height: 1.15;
+    text-align: left;
+  }
+  .pick-grid .pick-dot {
+    flex-shrink: 0;
+  }
+  /* palabras largas ("personalizados") se parten con guion si no caben */
+  .pick-grid .pick {
+    min-width: 0;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 359px) {
+  .pick-grid .pick {
+    gap: 0.4rem;
+    padding: 0.55rem 0.6rem;
+    font-size: 0.78rem;
+  }
 }
 
 .pick[data-active="true"] {
@@ -662,8 +811,10 @@ select.input {
   transition: color 0.14s ease;
 }
 
-.stepper button:hover {
-  color: var(--red);
+@media (hover: hover) {
+  .stepper button:hover {
+    color: var(--red);
+  }
 }
 
 .stepper output {
@@ -749,9 +900,11 @@ select.input {
   transition: color 0.15s ease, padding 0.2s ease;
 }
 
-.foot-link:hover {
-  color: white;
-  padding-left: 0.35rem;
+@media (hover: hover) {
+  .foot-link:hover {
+    color: white;
+    padding-left: 0.35rem;
+  }
 }
 
 .foot-icon {
@@ -1008,10 +1161,12 @@ select.input {
 }
 
 /* tarjetas: se inclinan un poco al pasar el ratón y la flecha empuja */
-.tile:nth-child(odd):hover { transform: translateY(-6px) rotate(-0.7deg); }
-.tile:nth-child(even):hover { transform: translateY(-6px) rotate(0.7deg); }
-.shot:nth-child(odd):hover { transform: translateY(-6px) rotate(-1deg); }
-.shot:nth-child(even):hover { transform: translateY(-6px) rotate(1deg); }
+@media (hover: hover) {
+  .tile:nth-child(odd):hover { transform: translateY(-6px) rotate(-0.7deg); }
+  .tile:nth-child(even):hover { transform: translateY(-6px) rotate(0.7deg); }
+  .shot:nth-child(odd):hover { transform: translateY(-6px) rotate(-1deg); }
+  .shot:nth-child(even):hover { transform: translateY(-6px) rotate(1deg); }
+}
 
 .tile .go b {
   display: inline-block;
@@ -1049,6 +1204,51 @@ select.input {
   90% { transform: rotate(-4deg) scale(1.05); }
   93% { transform: rotate(4deg) scale(1.05); }
   96% { transform: rotate(-2deg); }
+}
+
+/* WhatsApp: se aparta cuando el formulario está en pantalla (ya tiene su
+   propio botón verde y el flotante taparía los campos) */
+.wa-dock {
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  transition: transform 0.3s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.3s ease;
+}
+
+@media (hover: hover) {
+  .wa-dock:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.wa-dock[data-away="true"] {
+  opacity: 0;
+  transform: translateY(1.5rem) scale(0.8);
+  pointer-events: none;
+}
+
+/* menú del móvil: fondo que oscurece la página */
+/* (el .nav lleva backdrop-filter, así que "fixed" aquí se mide desde la
+   cabecera: por eso alto explícito en vez de bottom: 0) */
+.nav-backdrop {
+  position: fixed;
+  top: 4rem;
+  left: 0;
+  right: 0;
+  height: 100dvh;
+  z-index: -1;
+  background: rgba(32, 20, 54, 0.45);
+  animation: fade-in 0.2s ease;
+}
+
+.nav-sheet {
+  animation: sheet-down 0.28s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes sheet-down {
+  from { opacity: 0; transform: translateY(-10px); }
 }
 
 /* WhatsApp: onda que late */
@@ -1420,7 +1620,9 @@ select.input {
   .swap-in,
   .bump,
   .foot-logo,
-  .foil-credit svg {
+  .foil-credit svg,
+  .nav-backdrop,
+  .nav-sheet {
     animation: none;
     opacity: 1;
   }

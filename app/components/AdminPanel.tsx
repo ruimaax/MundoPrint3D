@@ -1,10 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SECTION_COLORS, coverOf, type Catalog, type Photo, type Section } from "../data/catalog";
+import {
+  QUESTION_KINDS,
+  SECTION_COLORS,
+  coverOf,
+  formOf,
+  type Catalog,
+  type Photo,
+  type Question,
+  type QuestionKind,
+  type Section,
+  type SectionForm,
+} from "../data/catalog";
 
-// Panel sencillo: crear y borrar secciones, ordenarlas, y subir o quitar
-// fotos de cada una. Cada cambio se guarda al momento en Cloudflare.
+// Panel sencillo: crear y borrar secciones, ordenarlas, subir o quitar fotos
+// de cada una y cambiar lo que pregunta el formulario de pedido para cada
+// sección. Cada cambio se guarda al momento en Cloudflare.
 
 type Status = { kind: "idle" | "saving" | "saved" | "error"; text?: string };
 
@@ -286,6 +298,12 @@ export default function AdminPanel() {
                 </div>
               </div>
             </div>
+
+            <FormEditor
+              section={section}
+              onChange={(form) => update(section.id, (s) => ({ ...s, form }))}
+              onReset={() => update(section.id, ({ form: _, ...s }) => s)}
+            />
           </article>
         ))}
       </div>
@@ -311,7 +329,9 @@ function Shell({ status, children }: { status: Status; children: React.ReactNode
             <img src="/brand/mundo-print-3d-logo.png" alt="" className="h-12 w-12 object-contain" />
             <div>
               <h1 className="display text-3xl">Panel de la web</h1>
-              <p className="text-sm font-semibold text-toy-ink/60">Secciones del catálogo y fotos de la vitrina</p>
+              <p className="text-sm font-semibold text-toy-ink/60">
+                Secciones del catálogo, fotos de la vitrina y formulario de pedido
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -442,6 +462,211 @@ function NewSection({ onCreate }: { onCreate: (title: string, color: string) => 
         Crear sección
       </button>
     </form>
+  );
+}
+
+// Preguntas del paso 2 del formulario de pedido para esta sección. Los textos
+// se guardan al salir del campo; el resto, al momento.
+function FormEditor({
+  section,
+  onChange,
+  onReset,
+}: {
+  section: Section;
+  onChange: (form: SectionForm) => void;
+  onReset: () => void;
+}) {
+  const form = formOf(section);
+  const { questions } = form;
+
+  const setQuestions = (next: Question[]) => onChange({ ...form, questions: next });
+  const edit = (id: string, change: (q: Question) => Question) =>
+    setQuestions(questions.map((q) => (q.id === id ? change(q) : q)));
+
+  const move = (index: number, delta: number) => {
+    const next = [...questions];
+    const to = index + delta;
+    if (to < 0 || to >= next.length) return;
+    [next[index], next[to]] = [next[to], next[index]];
+    setQuestions(next);
+  };
+
+  const add = () => {
+    const taken = new Set(questions.map((q) => q.id));
+    let id = "pregunta";
+    for (let n = 2; taken.has(id); n++) id = `pregunta-${n}`;
+    setQuestions([...questions, { id, kind: "short", label: "Nueva pregunta" }]);
+  };
+
+  const changeKind = (q: Question, kind: QuestionKind) =>
+    edit(q.id, ({ options, placeholder, required, ...rest }) => ({
+      ...rest,
+      kind,
+      ...(kind === "choice" ? { options: options?.length ? options : ["Opción 1", "Opción 2"] } : {}),
+      ...(kind === "short" || kind === "long" ? { ...(placeholder ? { placeholder } : {}), ...(required ? { required } : {}) } : {}),
+    }));
+
+  // Campo de texto que guarda al salir; si se deja vacío vuelve a lo de antes.
+  const textProps = (value: string, save: (v: string) => void, allowEmpty = false) => ({
+    defaultValue: value,
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const v = e.target.value.trim();
+      if (v === value) return;
+      if (!v && !allowEmpty) e.target.value = value;
+      else save(v);
+    },
+  });
+
+  return (
+    <details className="mt-6 rounded-2xl bg-toy-paper p-4 sm:p-5">
+      <summary className="cursor-pointer select-none font-extrabold">
+        Formulario de pedido · {questions.length} {questions.length === 1 ? "pregunta" : "preguntas"}
+        {!section.form && <span className="ml-2 text-sm font-semibold text-toy-ink/50">(las de siempre)</span>}
+      </summary>
+
+      <p className="mt-3 text-sm font-medium text-toy-ink/60">
+        Lo que se pregunta en el paso 2 del formulario cuando alguien elige esta sección. El nombre y la fecha se
+        piden siempre. Cada respuesta llega en el WhatsApp como «Pregunta: respuesta».
+      </p>
+
+      <label className="mt-4 block max-w-sm">
+        <span className="field-label">Título del paso 2</span>
+        <input
+          key={`title-${form.title}`}
+          className="input !py-2"
+          maxLength={40}
+          {...textProps(form.title, (title) => onChange({ ...form, title }))}
+        />
+      </label>
+
+      <ol className="mt-5 grid gap-3">
+        {questions.map((q, i) => (
+          <li key={q.id} className="rounded-xl bg-white p-4 shadow-[inset_0_0_0_2px_rgba(32,20,54,0.08)]">
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="block min-w-[200px] flex-1">
+                <span className="field-label">Pregunta</span>
+                <input
+                  key={`label-${q.label}`}
+                  className="input !py-2"
+                  maxLength={60}
+                  {...textProps(q.label, (label) => edit(q.id, (x) => ({ ...x, label })))}
+                />
+              </label>
+              <label className="block">
+                <span className="field-label">Tipo</span>
+                <select
+                  className="input !py-2 pr-10"
+                  value={q.kind}
+                  onChange={(e) => changeKind(q, e.target.value as QuestionKind)}
+                >
+                  {QUESTION_KINDS.map((k) => (
+                    <option key={k.kind} value={k.kind}>
+                      {k.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex gap-2 pb-1">
+                <button type="button" className="chip" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir pregunta">
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className="chip"
+                  onClick={() => move(i, 1)}
+                  disabled={i === questions.length - 1}
+                  aria-label="Bajar pregunta"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className="chip !text-toy-red"
+                  onClick={() => {
+                    if (confirm(`¿Quitar la pregunta «${q.label}»?`)) setQuestions(questions.filter((x) => x.id !== q.id));
+                  }}
+                >
+                  Quitar
+                </button>
+              </div>
+            </div>
+
+            {(q.kind === "short" || q.kind === "long") && (
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <label className="block min-w-[200px] flex-1">
+                  <span className="field-label">Texto de ejemplo (opcional)</span>
+                  <input
+                    key={`ph-${q.placeholder ?? ""}`}
+                    className="input !py-2"
+                    maxLength={200}
+                    placeholder="Lo que se ve en gris dentro del campo"
+                    {...textProps(
+                      q.placeholder ?? "",
+                      (v) => edit(q.id, ({ placeholder: _, ...x }) => (v ? { ...x, placeholder: v } : x)),
+                      true,
+                    )}
+                  />
+                </label>
+                <label className="flex items-center gap-2 pb-2.5 text-sm font-bold">
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 accent-toy-ink"
+                    checked={!!q.required}
+                    onChange={(e) =>
+                      edit(q.id, ({ required: _, ...x }) => (e.target.checked ? { ...x, required: true } : x))
+                    }
+                  />
+                  Obligatoria
+                </label>
+              </div>
+            )}
+
+            {q.kind === "choice" && (
+              <label className="mt-3 block">
+                <span className="field-label">Opciones (una por línea)</span>
+                <textarea
+                  key={`opts-${(q.options ?? []).join("|")}`}
+                  className="input min-h-28 resize-y !py-2"
+                  {...textProps((q.options ?? []).join("\n"), (v) =>
+                    edit(q.id, (x) => ({
+                      ...x,
+                      options: v
+                        .split("\n")
+                        .map((o) => o.trim().slice(0, 60))
+                        .filter(Boolean)
+                        .slice(0, 20),
+                    })),
+                  )}
+                />
+              </label>
+            )}
+
+            {q.kind === "count" && (
+              <p className="mt-3 text-sm font-medium text-toy-ink/60">
+                Se elige con los botones − y + (de 1 a 50).
+              </p>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="button" className="chip" onClick={add} disabled={questions.length >= 15}>
+          + Añadir pregunta
+        </button>
+        {section.form && (
+          <button
+            type="button"
+            className="chip"
+            onClick={() => {
+              if (confirm("¿Volver a las preguntas de siempre para esta sección?")) onReset();
+            }}
+          >
+            Volver a las de siempre
+          </button>
+        )}
+      </div>
+    </details>
   );
 }
 

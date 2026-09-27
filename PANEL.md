@@ -4,7 +4,12 @@ El cliente entra en `/admin` y puede:
 
 - crear, renombrar, ordenar y borrar **secciones** (cada una es una tarjeta del catálogo),
 - cambiar la **portada** de cada sección,
-- subir y quitar **fotos** de cada sección (salen en la vitrina).
+- subir y quitar **fotos** de cada sección (salen en la vitrina),
+- cambiar el **formulario de pedido** de cada sección: añadir, quitar, ordenar
+  y renombrar las preguntas del paso 2 (texto corto, texto largo, desplegable
+  o número) y marcar las obligatorias. Las secciones que no se han tocado usan
+  las preguntas de siempre (`formOf` en `app/data/catalog.ts`); el botón
+  *Volver a las de siempre* las recupera.
 
 Todo se guarda al momento en Workers KV (plan gratuito de Cloudflare, sin
 tarjeta) y la web lo muestra al recargar.

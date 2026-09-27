@@ -31,8 +31,8 @@ export default function SiteFooter() {
       <div className="foot-stripe" aria-hidden />
       <div>
         <div className="mx-auto max-w-shell px-5 sm:px-10">
-          <div className="grid gap-10 pt-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:gap-8">
-            <div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-12 sm:pt-14 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:gap-8">
+            <div className="col-span-2 sm:col-span-1">
               <p className="foot-head">El taller</p>
               <p className="mt-5 max-w-xs font-medium leading-7 text-white/80">
                 Funkos personalizados, figuras de mascotas y regalos únicos
@@ -59,10 +59,10 @@ export default function SiteFooter() {
 
             <nav aria-label="Navegación del pie">
               <p className="foot-head">Navegación</p>
-              <ul className="mt-5 grid gap-3">
+              <ul className="mt-5 grid gap-1 sm:gap-3">
                 {NAV.map((l) => (
                   <li key={l.href}>
-                    <a className="foot-link" href={l.href}>
+                    <a className="foot-link inline-block py-1.5 sm:py-0" href={l.href}>
                       {l.label}
                     </a>
                   </li>
@@ -72,10 +72,10 @@ export default function SiteFooter() {
 
             <nav aria-label="Catálogo">
               <p className="foot-head">Catálogo</p>
-              <ul className="mt-5 grid gap-3">
+              <ul className="mt-5 grid gap-1 sm:gap-3">
                 {sections.slice(0, 5).map((c) => (
                   <li key={c.id}>
-                    <a className="foot-link" href="/#catalogo">
+                    <a className="foot-link inline-block py-1.5 sm:py-0" href="/#catalogo">
                       {c.title}
                     </a>
                   </li>
@@ -83,7 +83,7 @@ export default function SiteFooter() {
               </ul>
             </nav>
 
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <p className="foot-head">Contacto</p>
               <a
                 href={WA_DEFAULT}
