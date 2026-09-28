@@ -6,7 +6,8 @@ import { useCatalog } from "../data/useCatalog";
 import { waLink } from "../data/contact";
 
 // Formulario de pedido: compone el mensaje y lo abre en WhatsApp, donde se
-// cierra el trato. Sin backend.
+// cierra el trato. A la vez manda una copia al worker (/api/pedido), que la
+// envía por correo al taller; si eso falla, WhatsApp se abre igual.
 // El paso 2 (las preguntas de cada sección) se edita desde /admin.
 
 // Las secciones del catálogo (editables desde /admin) más "Otro", para ideas
@@ -28,6 +29,9 @@ export default function BudgetForm() {
   ];
 
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  // Campo trampa, oculto: solo lo rellenan los bots.
+  const [website, setWebsite] = useState("");
   const [typeId, setTypeId] = useState(OPTIONS[0].id);
   // Respuestas del paso 2, por sección y pregunta ("mascota.como-es"), para
   // no perder lo escrito al cambiar de sección y volver.
@@ -46,29 +50,35 @@ export default function BudgetForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const when = noRush
-      ? "Sin prisa"
-      : date
-        ? new Date(`${date}T00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
-        : null;
+    const dateLabel = date
+      ? new Date(`${date}T00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
+      : null;
+    const when = noRush ? "Sin prisa" : dateLabel;
 
-    const lines: (string | null | false | undefined)[] = [
-      "¡Hola! Quiero pedir presupuesto desde la web.",
-      name.trim() && `Soy ${name.trim()}.`,
-      "",
-      `*Quiero:* ${type.order}`,
-      ...questions.map((q) => {
-        const v = valueOf(q).trim();
-        return v ? `*${q.label}:* ${v}` : null;
+    // Copia por correo, en segundo plano. keepalive: que no se corte al
+    // abrirse WhatsApp en otra pestaña o app.
+    fetch("/api/pedido", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        name: name.trim(),
+        phone: phone.trim(),
+        section: type.order,
+        color: type.color,
+        answers: questions.map((q) => ({ label: q.label, value: valueOf(q).trim() })),
+        when: when ?? "",
+        website,
       }),
-      when && `*Lo necesito para:* ${when}`,
-    ];
+    }).catch(() => {});
 
-    const message = lines
-      .filter((l): l is string => typeof l === "string")
-      .join("\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+    const message = whatsAppMessage({
+      name: name.trim(),
+      section: type.id === OTRO.id ? null : type.title,
+      answers: questions.map((q) => ({ question: q, value: valueOf(q).trim() })),
+      noRush,
+      date: noRush ? null : dateLabel,
+    });
     window.open(waLink(message), "_blank", "noopener,noreferrer");
   };
 
@@ -77,7 +87,7 @@ export default function BudgetForm() {
   const half = halfWidth(questions);
 
   return (
-    <form onSubmit={handleSubmit} className="order-form grid gap-7">
+    <form onSubmit={handleSubmit} className="order-form relative grid gap-7">
       {/* 1 · Qué quieres */}
       <fieldset className="grid gap-5">
         <legend className="form-step">
@@ -139,8 +149,25 @@ export default function BudgetForm() {
             />
           </label>
 
-          <div>
-            <label className="block">
+          <label className="block">
+            <span className="field-label">Tu móvil</span>
+            <input
+              className="input"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Ej.: 644 12 34 56"
+              autoComplete="tel"
+              maxLength={30}
+              required
+              pattern="[\+0-9 \(\)\-]{9,}"
+              title="Escribe un número de teléfono válido (mínimo 9 cifras)"
+            />
+          </label>
+
+          <div className="sm:col-span-2">
+            <label className="block sm:max-w-[calc(50%-0.625rem)]">
               <span className="field-label">¿Para cuándo?</span>
               <input
                 className="input disabled:opacity-40"
@@ -164,6 +191,18 @@ export default function BudgetForm() {
         </div>
       </fieldset>
 
+      {/* trampa para bots: fuera de la vista y del teclado */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        className="absolute -left-[9999px] h-px w-px opacity-0"
+      />
+
       <div className="send-row">
         <button type="submit" className="btn btn-green send-btn w-full text-lg sm:w-auto">
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
@@ -179,6 +218,80 @@ export default function BudgetForm() {
       </div>
     </form>
   );
+}
+
+// Mensaje de WhatsApp escrito como lo escribiría una persona, no como una
+// ficha: saludo, qué quiere en una frase, los detalles en lista y la fecha.
+//
+//   ¡Hola! 👋 Soy Adrian y os escribo desde la web.
+//
+//   Quería pedir presupuesto para *Funkos de la Selección*: serían *3 figuras*.
+//
+//   Os cuento:
+//   • *Jugador(es):* Mbappé
+//   • *Cómo es y qué lleva puesto:* …
+//
+//   No tengo prisa, cuando os venga bien.
+//
+//   ¡Muchas gracias!
+function whatsAppMessage({
+  name,
+  section,
+  answers,
+  noRush,
+  date,
+}: {
+  name: string;
+  /** null = "Otro": algo que no está en el catálogo. */
+  section: string | null;
+  answers: { question: Question; value: string }[];
+  noRush: boolean;
+  date: string | null;
+}): string {
+  // Un "Nº de figuras" se mete en la frase principal ("serían 3 figuras").
+  const count = answers.find((a) => a.question.kind === "count" && countUnit(a.question.label));
+  const amount = count ? `${count.value} ${countUnit(count.question.label, Number(count.value))}` : null;
+
+  const want = section
+    ? `Quería pedir presupuesto para *${section}*${amount ? `: ${Number(count!.value) === 1 ? "sería" : "serían"} *${amount}*` : ""}.`
+    : `Quería pedir presupuesto para una idea que no he visto en el catálogo${amount ? ` (${amount})` : ""}.`;
+
+  const rest = answers.filter((a) => a !== count && a.value);
+  // Las preguntas abiertas ("Cuéntanos qué necesitas") van como texto
+  // corrido; el resto, en lista con la etiqueta en boca del cliente.
+  const free = rest.filter((a) => isOpenQuestion(a.question.label)).map((a) => a.value);
+  const details = rest
+    .filter((a) => !isOpenQuestion(a.question.label))
+    .map((a) => `• *${firstPerson(a.question.label)}:* ${a.value}`);
+
+  const blocks = [
+    name ? `¡Hola! 👋 Soy ${name} y os escribo desde la web.` : "¡Hola! 👋 Os escribo desde la web.",
+    want,
+    details.length ? ["Os cuento:", ...details].join("\n") : null,
+    ...free.map((text, i) => (i === 0 && !details.length ? `Os cuento: ${text}` : text)),
+    noRush ? "No tengo prisa, cuando os venga bien." : date ? `Lo necesitaría para el *${date}*.` : null,
+    "¡Muchas gracias!",
+  ];
+  return blocks.filter(Boolean).join("\n\n");
+}
+
+// "Cuéntanos qué necesitas", "¿Algo más?": preguntas que no sirven de etiqueta.
+function isOpenQuestion(label: string): boolean {
+  return /^(¿|cu[eé]nta)/i.test(label.trim()) || label.trim().endsWith("?");
+}
+
+// Las etiquetas hablan al cliente ("Tu mascota"); en su mensaje, "Mi mascota".
+function firstPerson(label: string): string {
+  return label.replace(/^tus\b/i, "Mis").replace(/^tu\b/i, "Mi");
+}
+
+// "Nº de figuras" → "figuras" (o "figura" si es una). null si la pregunta no
+// sigue ese formato y hay que ponerla como un detalle más.
+function countUnit(label: string, n = 2): string | null {
+  const m = /^n(?:º|°|o|\.)\s*(?:de\s+)?(.+)$/i.exec(label.trim());
+  if (!m) return null;
+  const unit = m[1].toLowerCase();
+  return n === 1 && unit.endsWith("s") ? unit.slice(0, -1) : unit;
 }
 
 function defaultValue(q: Question): string {

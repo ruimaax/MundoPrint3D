@@ -15,6 +15,15 @@
   "kv_namespaces": [
     { "binding": "STORE", "id": "a7caf0ddfc7d45b6914834618de28e7c" }
   ],
-  // La contraseña del panel NO va aquí: se guarda como secreto con
+  // Correo de los pedidos del formulario (se envía con Resend).
+  // Mientras el dominio no esté verificado en Resend, el remitente tiene que
+  // ser onboarding@resend.dev y el destino, el correo de la cuenta de Resend.
+  "vars": {
+    "QUOTE_EMAIL_TO": "mundoprint3dceuta@gmail.com",
+    "QUOTE_EMAIL_FROM": "Mundo Print 3D <onboarding@resend.dev>"
+  }
+  // La contraseña del panel y la clave de Resend NO van aquí: se guardan
+  // como secretos con
   //   npx wrangler secret put ADMIN_PASSWORD
+  //   npx wrangler secret put RESEND_API_KEY
 }

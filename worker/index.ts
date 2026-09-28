@@ -2,6 +2,7 @@
 // panel de administración.
 //
 //   GET    /api/catalog               catálogo público (JSON)
+//   POST   /api/pedido                formulario de pedido → correo al taller
 //   GET    /img/<nombre>              imágenes subidas desde el panel (R2)
 //   GET    /admin/api/session         ¿hay sesión abierta?
 //   POST   /admin/api/login           entrar con la contraseña del panel
@@ -23,6 +24,7 @@ import {
   type Section,
   type SectionForm,
 } from "../app/data/catalog";
+import { LOGO_CID, buildOrderEmail, type Order } from "./email";
 
 // --- tipos mínimos de Cloudflare (sin dependencias extra) ---
 interface KVNamespace {
@@ -45,6 +47,11 @@ interface Env {
   ADMIN_PASSWORD?: string;
   /** Solo en local (.dev.vars): "1" entra al panel sin contraseña. */
   DEV_ADMIN?: string;
+  /** Clave de Resend. Se pone con: npx wrangler secret put RESEND_API_KEY */
+  RESEND_API_KEY?: string;
+  /** Dónde llegan los pedidos y quién los envía (wrangler.jsonc → vars). */
+  QUOTE_EMAIL_TO?: string;
+  QUOTE_EMAIL_FROM?: string;
 }
 
 const CATALOG_KEY = "catalog.json";
@@ -69,6 +76,10 @@ export default {
 
     if (pathname === "/api/catalog" && method === "GET") {
       return json(await readCatalog(env));
+    }
+
+    if (pathname === "/api/pedido" && method === "POST") {
+      return sendOrder(request, env, url.origin);
     }
 
     if (pathname.startsWith("/img/") && method === "GET") {
@@ -262,6 +273,92 @@ function validateForm(input: unknown): SectionForm | null {
     });
   }
   return { title, questions };
+}
+
+// --- formulario de pedido → correo al taller (Resend) ---
+//
+// El formulario abre WhatsApp y, a la vez, manda aquí una copia. Si el correo
+// falla el cliente no se entera: WhatsApp se abre igual.
+
+async function sendOrder(request: Request, env: Env, origin: string): Promise<Response> {
+  if (!env.RESEND_API_KEY || !env.QUOTE_EMAIL_TO || !env.QUOTE_EMAIL_FROM) {
+    return json({ error: "El envío de correos no está configurado" }, 503);
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "JSON no válido" }, 400);
+  }
+  const raw = (body ?? {}) as Record<string, unknown>;
+
+  // Campo trampa: invisible para las personas, los bots lo rellenan.
+  if (raw.website) return json({ ok: true });
+
+  const order = validateOrder(raw);
+  if (!order) return json({ error: "Pedido no válido" }, 400);
+
+  // Freno al spam: 5 pedidos por IP cada 10 minutos.
+  const ip = request.headers.get("cf-connecting-ip") ?? "local";
+  const key = `pedidos/${ip}`;
+  const count = Number((await env.STORE.get(key, "json")) ?? 0);
+  if (count >= 5) return json({ error: "Demasiados envíos. Prueba dentro de un rato." }, 429);
+  await env.STORE.put(key, JSON.stringify(count + 1), { expirationTtl: 600 });
+
+  // Logo incrustado en el correo (ver email.ts). Si no se pudiera leer, el
+  // correo sale igual, sin logo.
+  const logo = await env.ASSETS.fetch(new Request(`${origin}/brand/logo-email.png`))
+    .then((r) => (r.ok ? r.arrayBuffer() : null))
+    .catch(() => null);
+
+  const { subject, html, text } = buildOrderEmail(order, origin, logo ? {} : { logoSrc: `${origin}/brand/logo-email.png` });
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      from: env.QUOTE_EMAIL_FROM,
+      to: [env.QUOTE_EMAIL_TO],
+      subject,
+      html,
+      text,
+      ...(logo
+        ? { attachments: [{ filename: "logo.png", content: toBase64(logo), content_type: "image/png", content_id: LOGO_CID }] }
+        : {}),
+    }),
+  });
+  if (!res.ok) {
+    console.error("Resend", res.status, await res.text().catch(() => ""));
+    return json({ error: "No se pudo enviar el correo" }, 502);
+  }
+  return json({ ok: true });
+}
+
+function toBase64(buf: ArrayBuffer): string {
+  let bin = "";
+  for (const b of new Uint8Array(buf)) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+function validateOrder(o: Record<string, unknown>): Order | null {
+  const name = str(o.name, 60, true);
+  const phone = str(o.phone, 30, true);
+  const section = str(o.section, 60, true);
+  const when = str(o.when, 60);
+  const color = typeof o.color === "string" && COLOR_RE.test(o.color) ? o.color : "#201436";
+  if (!name || !section || !phone || when === null) return null;
+  if (phone.replace(/\D/g, "").length < 9) return null;
+  if (!Array.isArray(o.answers) || o.answers.length > 20) return null;
+
+  const answers: Order["answers"] = [];
+  for (const a of o.answers) {
+    if (!a || typeof a !== "object") return null;
+    const label = str((a as Record<string, unknown>).label, 60, true);
+    const value = str((a as Record<string, unknown>).value, 1500);
+    if (!label || value === null) return null;
+    if (value) answers.push({ label, value });
+  }
+  return { name, phone, section, color, answers, ...(when ? { when } : {}) };
 }
 
 // --- acceso al panel: contraseña propia ---

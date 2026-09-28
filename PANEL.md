@@ -73,3 +73,23 @@ panel **sin contraseña solo en local**. Nunca pongas `DEV_ADMIN` en Cloudflare.
 Para probar el login en local, cambia `.dev.vars` por `ADMIN_PASSWORD=loquesea`.
 
 Con `npm run dev` la web funciona con la semilla, pero el panel no, porque no hay API.
+
+## Copia de los pedidos por correo
+
+Cuando alguien envía el formulario, además de abrirse WhatsApp, el worker
+(`POST /api/pedido`) manda una copia con plantilla HTML (`worker/email.ts`)
+a `QUOTE_EMAIL_TO` a través de [Resend](https://resend.com). Si el correo
+falla, el cliente no se entera: WhatsApp se abre igual.
+
+- La clave de Resend es un secreto: `npx wrangler secret put RESEND_API_KEY`.
+- El destino y el remitente están en `wrangler.jsonc` → `vars`.
+- Freno al spam: campo trampa invisible y máximo 5 envíos por IP cada 10 minutos.
+
+**Mientras el dominio no esté verificado en Resend**, el remitente tiene que
+ser `onboarding@resend.dev` y solo se puede enviar al correo de la cuenta de
+Resend. Para usar un remitente propio (p. ej. `pedidos@mundoprint3d.com`):
+Resend → *Domains* → *Add domain*, añadir los registros DNS que indica y,
+cuando salga *Verified*, cambiar `QUOTE_EMAIL_FROM` en `wrangler.jsonc`.
+
+Para probarlo en local con `npm run cf:dev`, añade `RESEND_API_KEY=...` a
+`.dev.vars` (ese archivo no se sube a git).
