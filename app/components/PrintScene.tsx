@@ -32,8 +32,8 @@ const IDEAS: { id: string; label: string; title: string; funko: FunkoVariant; ph
   },
   {
     id: "perro",
-    title: "Tu perro",
-    label: "Tu perro",
+    title: "Tu mascota",
+    label: "Tu mascota",
     funko: "perro",
     photo: (
       <svg viewBox="0 0 100 100">
@@ -94,6 +94,25 @@ const IDEAS: { id: string; label: string; title: string; funko: FunkoVariant; ph
       </svg>
     ),
   },
+  {
+    id: "funko",
+    title: "Tu funko",
+    label: "Tu funko",
+    funko: "heroe",
+    photo: (
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#ddd6fe" />
+        <rect x="15" y="8" width="70" height="85" rx="6" fill="#fff6ea" stroke={INK} strokeWidth="2.5" />
+        <rect x="23" y="16" width="54" height="63" rx="3" fill="#bae6fd" />
+        <rect x="31" y="25" width="38" height="32" rx="12" fill="#f5c9a8" stroke={INK} strokeWidth="2.5" />
+        <path d="M31 37 Q28 17 50 19 Q72 17 69 37 L60 29 L38 33 Z" fill={INK} />
+        <circle cx="41" cy="43" r="4" fill={INK} /><circle cx="59" cy="43" r="4" fill={INK} />
+        <rect x="39" y="58" width="22" height="16" rx="4" fill="#ef4444" stroke={INK} strokeWidth="2.5" />
+        <path d="M43 74 V80 M57 74 V80" stroke={INK} strokeWidth="5" strokeLinecap="round" />
+        <path d="M40 86 H60" stroke="#6c4cff" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 // El titular del hero y la escena comparten la idea que se está imprimiendo.
@@ -107,7 +126,7 @@ export function HeroIdeaProvider({ children }: { children: React.ReactNode }) {
   return <IdeaContext.Provider value={{ idx, setIdx }}>{children}</IdeaContext.Provider>;
 }
 
-// Titular que cambia con la idea: "Tú, hecho figura" → "Tu perro, hecho figura"…
+// Titular que cambia con la idea: "Tú, hecho figura" → "Tu mascota, hecho figura"…
 export function HeroTitle({ className, style }: { className?: string; style?: React.CSSProperties }) {
   const { idx } = useContext(IdeaContext);
   const idea = IDEAS[idx];

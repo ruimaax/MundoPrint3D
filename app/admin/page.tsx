@@ -6,9 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Panel de administración. En producción esta ruta y /admin/api/* están
-// protegidas con Cloudflare Access (el cliente entra con un código que le
-// llega por email).
+// El worker protege /admin/api/* con la sesión firmada del panel.
 export default function AdminPage() {
   return <AdminPanel />;
 }

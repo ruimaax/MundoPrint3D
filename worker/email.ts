@@ -2,18 +2,8 @@
 // Maquetado con tablas y estilos en línea, que es lo único que respetan por
 // igual Gmail, Outlook y el Mail del iPhone.
 
-export type Order = {
-  name: string;
-  phone?: string;
-  /** Sección elegida en el paso 1 ("Funkos personalizados", "Otro"…). */
-  section: string;
-  /** Color de la sección, para la etiqueta. */
-  color: string;
-  /** Respuestas del paso 2, en el orden del formulario. */
-  answers: { label: string; value: string }[];
-  /** "15 de octubre de 2026" o "Sin prisa". */
-  when?: string;
-};
+import type { Order } from "../app/data/orders";
+export type { Order } from "../app/data/orders";
 
 const INK = "#201436";
 const PAPER = "#f7ede0";

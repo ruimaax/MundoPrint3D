@@ -4,10 +4,10 @@ import { useState } from "react";
 import { GENERIC_FORM, formOf, inkOn, type Question, type SectionForm } from "../data/catalog";
 import { useCatalog } from "../data/useCatalog";
 import { waLink } from "../data/contact";
+import { localDate } from "../data/orders";
 
 // Formulario de pedido: compone el mensaje y lo abre en WhatsApp, donde se
-// cierra el trato. A la vez manda una copia al worker (/api/pedido), que la
-// envía por correo al taller; si eso falla, WhatsApp se abre igual.
+// cierra el trato. Primero guarda el pedido en el historial del taller.
 // El paso 2 (las preguntas de cada sección) se edita desde /admin.
 
 // Las secciones del catálogo (editables desde /admin) más "Otro", para ideas
@@ -39,47 +39,67 @@ export default function BudgetForm() {
 
   const [date, setDate] = useState("");
   const [noRush, setNoRush] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sentLink, setSentLink] = useState<string | null>(null);
 
   const type = OPTIONS.find((c) => c.id === typeId) ?? OPTIONS[0];
   const { title: stepTitle, questions } = type.form;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDate();
 
   const valueOf = (q: Question) => answers[`${type.id}.${q.id}`] ?? defaultValue(q);
   const setValue = (q: Question, value: string) =>
     setAnswers((a) => ({ ...a, [`${type.id}.${q.id}`]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setSendError(null);
+    setSentLink(null);
+    // Reservar la pestaña durante el gesto para evitar el bloqueo de ventanas.
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
     const dateLabel = date
       ? new Date(`${date}T00:00`).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
       : null;
     const when = noRush ? "Sin prisa" : dateLabel;
 
-    // Copia por correo, en segundo plano. keepalive: que no se corte al
-    // abrirse WhatsApp en otra pestaña o app.
-    fetch("/api/pedido", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      keepalive: true,
-      body: JSON.stringify({
-        name: name.trim(),
-        phone: phone.trim(),
-        section: type.order,
-        color: type.color,
-        answers: questions.map((q) => ({ label: q.label, value: valueOf(q).trim() })),
-        when: when ?? "",
-        website,
-      }),
-    }).catch(() => {});
+    try {
+      const response = await fetch("/api/pedido", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          section: type.order,
+          color: type.color,
+          answers: questions.map((q) => ({ label: q.label, value: valueOf(q).trim() })),
+          when: when ?? "",
+          dueDate: noRush ? null : date || null,
+          website,
+        }),
+      });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? "No se pudo guardar el pedido");
 
-    const message = whatsAppMessage({
-      name: name.trim(),
-      section: type.id === OTRO.id ? null : type.title,
-      answers: questions.map((q) => ({ question: q, value: valueOf(q).trim() })),
-      noRush,
-      date: noRush ? null : dateLabel,
-    });
-    window.open(waLink(message), "_blank", "noopener,noreferrer");
+      const message = whatsAppMessage({
+        name: name.trim(),
+        section: type.id === OTRO.id ? null : type.title,
+        answers: questions.map((q) => ({ question: q, value: valueOf(q).trim() })),
+        noRush,
+        date: noRush ? null : dateLabel,
+      });
+      const link = waLink(message);
+      setSentLink(link);
+      if (popup) popup.location.replace(link);
+    } catch (error) {
+      popup?.close();
+      setSendError(error instanceof Error ? error.message : "No se pudo guardar el pedido. Inténtalo de nuevo.");
+    } finally {
+      setSending(false);
+    }
   };
 
   // Los campos cortos (texto y desplegable) van de dos en dos; los largos y
@@ -204,11 +224,11 @@ export default function BudgetForm() {
       />
 
       <div className="send-row">
-        <button type="submit" className="btn btn-green send-btn w-full text-lg sm:w-auto">
+        <button type="submit" disabled={sending} className="btn btn-green send-btn w-full text-lg disabled:opacity-60 sm:w-auto">
           <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
             <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4 0-.5.2-.7l.5-.6c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.6.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.6Z" />
           </svg>
-          Enviar por WhatsApp
+          {sending ? "Guardando pedido…" : "Enviar por WhatsApp"}
         </button>
         <p className="w-full text-center text-sm font-semibold leading-5 text-toy-ink/60 sm:w-auto sm:text-left">
           Sin compromiso<span className="sm:hidden"> · </span>
@@ -216,6 +236,8 @@ export default function BudgetForm() {
           Respuesta en 24–48 h
         </p>
       </div>
+      {sendError && <p role="alert" className="font-semibold text-toy-red">{sendError}</p>}
+      {sentLink && <p role="status" className="font-semibold">Pedido registrado. <a href={sentLink} target="_blank" rel="noopener noreferrer" className="underline">Continuar en WhatsApp ↗</a></p>}
     </form>
   );
 }

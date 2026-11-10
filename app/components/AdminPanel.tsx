@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import AdminOrders from "./AdminOrders";
+import CatalogLayout from "./CatalogLayout";
 import {
   QUESTION_KINDS,
   SECTION_COLORS,
@@ -75,6 +77,8 @@ function deleteImage(src?: string) {
 export default function AdminPanel() {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [locked, setLocked] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+  const onLocked = useCallback(() => { setLocked(true); setAuthorized(false); }, []);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [busy, setBusy] = useState<string | null>(null);
@@ -93,8 +97,8 @@ export default function AdminPanel() {
         if (check.status === 401) setLocked(true);
         else if (!check.ok) {
           const data = (await check.json().catch(() => ({}))) as { error?: string };
-          setStatus({ kind: "error", text: data.error ?? "El panel no está disponible" });
-        }
+          setLoadError(data.error ?? "El panel no está disponible");
+        } else setAuthorized(true);
       })
       .catch(() =>
         setLoadError(
@@ -135,7 +139,7 @@ export default function AdminPanel() {
   if (locked) {
     return (
       <Shell status={{ kind: "idle" }}>
-        <Login onDone={() => setLocked(false)} />
+        <Login onDone={() => { setLocked(false); setAuthorized(true); }} />
       </Shell>
     );
   }
@@ -146,7 +150,7 @@ export default function AdminPanel() {
       </Shell>
     );
   }
-  if (!catalog) {
+  if (!catalog || !authorized) {
     return (
       <Shell status={status}>
         <p className="font-semibold text-toy-ink/60">Cargando…</p>
@@ -215,6 +219,8 @@ export default function AdminPanel() {
 
   return (
     <Shell status={status}>
+      <AdminOrders onLocked={onLocked}>
+      <CatalogLayout catalog={catalog} onChange={commit} />
       <NewSection onCreate={addSection} />
 
       <div className="mt-10 grid gap-6">
@@ -307,6 +313,7 @@ export default function AdminPanel() {
           </article>
         ))}
       </div>
+      </AdminOrders>
     </Shell>
   );
 }
@@ -330,7 +337,7 @@ function Shell({ status, children }: { status: Status; children: React.ReactNode
             <div>
               <h1 className="display text-3xl">Panel de la web</h1>
               <p className="text-sm font-semibold text-toy-ink/60">
-                Secciones del catálogo, fotos de la vitrina y formulario de pedido
+                Pedidos, calendario y catálogo de la web
               </p>
             </div>
           </div>

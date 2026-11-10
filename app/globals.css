@@ -204,6 +204,10 @@ img {
   gap: 0.75rem;
 }
 
+.admin-wall { grid-auto-rows: 11rem; }
+.admin-wall .tile { user-select: none; }
+.admin-wall .tile .veil { background: linear-gradient(transparent, rgba(32, 20, 54, 0.9)); }
+
 /* móvil: la primera a lo ancho y en grande; si la última se queda sola en
    su fila, también a lo ancho */
 @media (max-width: 719px) {

@@ -131,7 +131,7 @@ export default function Page() {
               className="rise mt-6 max-w-md text-lg font-medium leading-7 text-white/85"
               style={{ "--rise-delay": "150ms" } as React.CSSProperties}
             >
-              Funkos con tu cara, tu perro convertido en muñeco, rótulos con tu
+              Funkos con tu cara, tu mascota convertida en muñeco, rótulos con tu
               nombre y piezas que no existen en ninguna tienda. Impreso, pintado
               y enviado a tu casa.
             </p>

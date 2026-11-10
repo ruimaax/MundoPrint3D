@@ -3,7 +3,7 @@ import { galleryItems } from "./gallery";
 
 // Catálogo editable desde /admin. Cada sección sale como tarjeta en el
 // catálogo (con su portada) y sus fotos salen en la vitrina.
-// La copia buena vive en Cloudflare R2 (catalog.json); esto es la semilla
+// La copia buena vive en Cloudflare KV (catalog.json); esto es la semilla
 // inicial y el respaldo si la API no responde.
 
 export type Photo = {
@@ -17,6 +17,8 @@ export type Section = {
   title: string;
   /** Color de fondo de la tarjeta mientras carga la imagen. */
   color: string;
+  /** Si falta, mantiene la composición automática del catálogo original. */
+  size?: TileSize;
   /** Imagen de la tarjeta del catálogo. Si falta, se usa la primera foto. */
   cover?: string;
   description?: string;
@@ -60,6 +62,19 @@ export const QUESTION_KINDS: { kind: QuestionKind; label: string }[] = [
 export type Catalog = {
   sections: Section[];
 };
+
+export type TileSize = "normal" | "big" | "wide" | "full";
+export const TILE_SIZES: { value: TileSize; label: string }[] = [
+  { value: "normal", label: "Normal" },
+  { value: "big", label: "Grande" },
+  { value: "wide", label: "Ancha" },
+  { value: "full", label: "Ancho completo" },
+];
+
+export function sectionSpans(sections: Section[]): ("big" | "wide" | "full" | "")[] {
+  const automatic = tileSpans(sections.length);
+  return sections.map((section, i) => section.size === undefined ? automatic[i] : section.size === "normal" ? "" : section.size);
+}
 
 // Colores que el panel ofrece para las secciones nuevas.
 export const SECTION_COLORS = [

@@ -2,12 +2,15 @@
 // panel de administración.
 //
 //   GET    /api/catalog               catálogo público (JSON)
-//   POST   /api/pedido                formulario de pedido → correo al taller
+//   POST   /api/pedido                guarda el pedido y envía copia por correo
 //   GET    /img/<nombre>              imágenes subidas desde el panel (R2)
 //   GET    /admin/api/session         ¿hay sesión abierta?
 //   POST   /admin/api/login           entrar con la contraseña del panel
 //   POST   /admin/api/logout          salir
 //   PUT    /admin/api/catalog         guarda el catálogo            ┐ requieren
+//   GET    /admin/api/orders          historial paginado             │
+//   GET    /admin/api/orders/<id>     detalle completo                │
+//   PATCH  /admin/api/orders/<id>     cambia el estado                │
 //   POST   /admin/api/images          sube una imagen, devuelve src  │ haber
 //   DELETE /admin/api/images/<nombre> borra una imagen              ┘ entrado
 //
@@ -25,9 +28,13 @@ import {
   type SectionForm,
 } from "../app/data/catalog";
 import { LOGO_CID, buildOrderEmail, type Order } from "./email";
+import { ORDER_STATUSES, dateLabel, validDate, type StoredOrder, type OrderStatus } from "../app/data/orders";
 
 // --- tipos mínimos de Cloudflare (sin dependencias extra) ---
 interface KVNamespace {
+  list(options: { prefix: string; cursor?: string; limit?: number }): Promise<{
+    keys: { name: string }[]; list_complete: boolean; cursor?: string;
+  }>;
   get(key: string, type: "json"): Promise<unknown>;
   getWithMetadata(
     key: string,
@@ -69,7 +76,7 @@ const json = (data: unknown, status = 200) =>
   });
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx?: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
     const method = request.method;
@@ -79,7 +86,7 @@ export default {
     }
 
     if (pathname === "/api/pedido" && method === "POST") {
-      return sendOrder(request, env, url.origin);
+      return sendOrder(request, env, url.origin, ctx);
     }
 
     if (pathname.startsWith("/img/") && method === "GET") {
@@ -112,6 +119,30 @@ export default {
       // ¿Hay sesión? El panel lo consulta al abrirse.
       if (pathname === "/admin/api/session" && method === "GET") {
         return json({ ok: true });
+      }
+
+      if (pathname === "/admin/api/orders" && method === "GET") {
+        const page = await env.STORE.list({ prefix: "orders/", limit: 100, cursor: url.searchParams.get("cursor") || undefined });
+        const orders = (await Promise.all(page.keys.map((key) => env.STORE.get(key.name, "json"))))
+          .filter((order): order is StoredOrder => order !== null);
+        return json({ orders, cursor: page.list_complete ? null : page.cursor });
+      }
+
+      if (pathname.startsWith("/admin/api/orders/")) {
+        const id = pathname.slice("/admin/api/orders/".length);
+        if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: "Pedido no válido" }, 400);
+        const order = await env.STORE.get(`orders/${id}`, "json") as StoredOrder | null;
+        if (!order) return json({ error: "Pedido no encontrado" }, 404);
+        if (method === "GET") return json(order);
+        if (method === "PATCH") {
+          const body = await request.json().catch(() => null) as { status?: unknown } | null;
+          if (typeof body?.status !== "string" || !Object.hasOwn(ORDER_STATUSES, body.status)) {
+            return json({ error: "Estado no válido" }, 400);
+          }
+          const updated: StoredOrder = { ...order, status: body.status as OrderStatus };
+          await env.STORE.put(`orders/${id}`, JSON.stringify(updated));
+          return json(updated);
+        }
       }
 
       if (pathname === "/admin/api/catalog" && method === "PUT") {
@@ -193,6 +224,7 @@ function validateCatalog(input: unknown): Catalog | null {
     const description = str(o.description, 300);
     const tagline = str(o.tagline, 40);
     const cover = o.cover === undefined || o.cover === null || o.cover === "" ? undefined : o.cover;
+    if (o.size !== undefined && !["normal", "big", "wide", "full"].includes(o.size as string)) return null;
     if (!id || ids.has(id) || !title || !color || description === null || tagline === null) return null;
     if (cover !== undefined && (typeof cover !== "string" || !SRC_RE.test(cover))) return null;
     if (!Array.isArray(o.photos) || o.photos.length > 300) return null;
@@ -222,6 +254,7 @@ function validateCatalog(input: unknown): Catalog | null {
       id,
       title,
       color,
+      ...(o.size !== undefined ? { size: o.size as Section["size"] } : {}),
       ...(cover ? { cover: cover as string } : {}),
       ...(description ? { description } : {}),
       ...(tagline ? { tagline } : {}),
@@ -275,16 +308,11 @@ function validateForm(input: unknown): SectionForm | null {
   return { title, questions };
 }
 
-// --- formulario de pedido → correo al taller (Resend) ---
+// --- formulario de pedido → registro y copia por correo (Resend) ---
 //
-// El formulario abre WhatsApp y, a la vez, manda aquí una copia. Si el correo
-// falla el cliente no se entera: WhatsApp se abre igual.
+// Se confirma el registro antes de abrir WhatsApp. El correo es independiente.
 
-async function sendOrder(request: Request, env: Env, origin: string): Promise<Response> {
-  if (!env.RESEND_API_KEY || !env.QUOTE_EMAIL_TO || !env.QUOTE_EMAIL_FROM) {
-    return json({ error: "El envío de correos no está configurado" }, 503);
-  }
-
+async function sendOrder(request: Request, env: Env, origin: string, ctx?: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
   let body: unknown;
   try {
     body = await request.json();
@@ -305,6 +333,28 @@ async function sendOrder(request: Request, env: Env, origin: string): Promise<Re
   const count = Number((await env.STORE.get(key, "json")) ?? 0);
   if (count >= 5) return json({ error: "Demasiados envíos. Prueba dentro de un rato." }, 429);
   await env.STORE.put(key, JSON.stringify(count + 1), { expirationTtl: 600 });
+
+  const stored: StoredOrder = {
+    ...order, id: crypto.randomUUID(), createdAt: new Date().toISOString(), status: "pending",
+  };
+  try {
+    // Una clave por pedido: los envíos simultáneos no sobrescriben el historial.
+    await env.STORE.put(`orders/${stored.id}`, JSON.stringify(stored));
+  } catch {
+    return json({ error: "No se pudo guardar el pedido. Inténtalo de nuevo." }, 503);
+  }
+
+  // El registro existe aunque el correo esté sin configurar o falle.
+  const notify = emailOrder(order, env, origin).catch(() => {
+    console.error("No se pudo enviar la copia del pedido", stored.id);
+  });
+  if (ctx) ctx.waitUntil(notify);
+  else await notify;
+  return json({ ok: true, id: stored.id }, 201);
+}
+
+async function emailOrder(order: Order, env: Env, origin: string): Promise<void> {
+  if (!env.RESEND_API_KEY || !env.QUOTE_EMAIL_TO || !env.QUOTE_EMAIL_FROM) return;
 
   // Logo incrustado en el correo (ver email.ts). Si no se pudiera leer, el
   // correo sale igual, sin logo.
@@ -329,9 +379,7 @@ async function sendOrder(request: Request, env: Env, origin: string): Promise<Re
   });
   if (!res.ok) {
     console.error("Resend", res.status, await res.text().catch(() => ""));
-    return json({ error: "No se pudo enviar el correo" }, 502);
   }
-  return json({ ok: true });
 }
 
 function toBase64(buf: ArrayBuffer): string {
@@ -345,6 +393,8 @@ function validateOrder(o: Record<string, unknown>): Order | null {
   const phone = str(o.phone, 30, true);
   const section = str(o.section, 60, true);
   const when = str(o.when, 60);
+  if (o.dueDate !== undefined && o.dueDate !== null && o.dueDate !== "" && !validDate(o.dueDate)) return null;
+  const dueDate = validDate(o.dueDate) ? o.dueDate : undefined;
   const color = typeof o.color === "string" && COLOR_RE.test(o.color) ? o.color : "#201436";
   if (!name || !section || !phone || when === null) return null;
   if (phone.replace(/\D/g, "").length < 9) return null;
@@ -358,7 +408,7 @@ function validateOrder(o: Record<string, unknown>): Order | null {
     if (!label || value === null) return null;
     if (value) answers.push({ label, value });
   }
-  return { name, phone, section, color, answers, ...(when ? { when } : {}) };
+  return { name, phone, section, color, answers, ...(dueDate ? { dueDate, when: dateLabel(dueDate) } : when ? { when } : {}) };
 }
 
 // --- acceso al panel: contraseña propia ---

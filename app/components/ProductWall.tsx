@@ -1,6 +1,6 @@
 "use client";
 
-import { coverOf, tileSpans } from "../data/catalog";
+import { coverOf, sectionSpans } from "../data/catalog";
 import { useCatalog } from "../data/useCatalog";
 import { waLink } from "../data/contact";
 
@@ -9,7 +9,7 @@ import { waLink } from "../data/contact";
 // con el pedido escrito.
 export default function ProductWall() {
   const { sections } = useCatalog();
-  const spans = tileSpans(sections.length);
+  const spans = sectionSpans(sections);
 
   return (
     <div className="wall">

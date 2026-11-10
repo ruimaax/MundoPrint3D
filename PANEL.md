@@ -4,6 +4,10 @@ El cliente entra en `/admin` y puede:
 
 - crear, renombrar, ordenar y borrar **secciones** (cada una es una tarjeta del catálogo),
 - cambiar la **portada** de cada sección,
+- organizar las tarjetas **arrastrando** desde el asa ⠿ (también en móvil),
+  elegir tamaño normal, grande, ancho o completo, y soltar una tarjeta en
+  **En grande** para destacarla. El orden y el tamaño se guardan en el catálogo.
+  Con teclado, las flechas del asa cambian la posición,
 - subir y quitar **fotos** de cada sección (salen en la vitrina),
 - cambiar el **formulario de pedido** de cada sección: añadir, quitar, ordenar
   y renombrar las preguntas del paso 2 (texto corto, texto largo, desplegable
@@ -14,6 +18,30 @@ El cliente entra en `/admin` y puede:
 Todo se guarda al momento en Workers KV (plan gratuito de Cloudflare, sin
 tarjeta) y la web lo muestra al recargar.
 Las fotos se reducen en el navegador (máx. 1600 px, WebP) antes de subirlas.
+
+## Pedidos y calendario
+
+Al entrar aparece el resumen, con un aviso de los pedidos pendientes y en
+preparación y el calendario del mes actual. Cada día con una fecha solicitada
+se marca con el número de pedidos. Pulsar el día muestra sus pedidos; pulsar
+uno abre todos sus datos y respuestas. Los pedidos sin fecha también se
+conservan en la pestaña **Pedidos**.
+
+La pestaña **Pedidos** permite buscar por nombre, teléfono, sección o referencia,
+filtrar por fecha o estado, y cambiar el estado entre pendiente, en preparación,
+terminado y cancelado. Terminar un pedido lo quita del aviso, pero conserva
+su registro y su fecha en el calendario.
+
+El formulario guarda cada pedido como `orders/<uuid>` en KV antes de abrir
+WhatsApp. La copia por correo se envía por separado: su fallo no pierde el
+pedido. El historial requiere sesión de administrador y se carga por páginas.
+Las fechas se guardan como `AAAA-MM-DD`, sin cambios de día por zona horaria.
+El registro empieza con esta actualización: los pedidos anteriores que solo
+se enviaron por correo o WhatsApp no se pueden recuperar automáticamente.
+
+API privada: `GET /admin/api/orders` (cursor opcional),
+`GET /admin/api/orders/<id>` y `PATCH /admin/api/orders/<id>` con `{status}`.
+Pruebas de almacenamiento, acceso, estados, fechas y catálogo: `npm test`.
 
 ## Cómo funciona
 
@@ -76,10 +104,11 @@ Con `npm run dev` la web funciona con la semilla, pero el panel no, porque no ha
 
 ## Copia de los pedidos por correo
 
-Cuando alguien envía el formulario, además de abrirse WhatsApp, el worker
+Cuando alguien envía el formulario, después de guardar el pedido, el worker
 (`POST /api/pedido`) manda una copia con plantilla HTML (`worker/email.ts`)
 a `QUOTE_EMAIL_TO` a través de [Resend](https://resend.com). Si el correo
-falla, el cliente no se entera: WhatsApp se abre igual.
+falla, el pedido sigue registrado y WhatsApp se abre igual. Si falla el guardado,
+el formulario muestra un error y permite reintentar.
 
 - La clave de Resend es un secreto: `npx wrangler secret put RESEND_API_KEY`.
 - El destino y el remitente están en `wrangler.jsonc` → `vars`.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCatalog } from "../data/useCatalog";
-import { PHONE, WA_DEFAULT } from "../data/contact";
+import { WA_DEFAULT } from "../data/contact";
 
 const NAV = [
   { href: "/#catalogo", label: "Catálogo" },
@@ -12,7 +12,6 @@ const NAV = [
 ];
 
 // +34 644 19 55 90
-const PHONE_LABEL = `+${PHONE.slice(0, 2)} ${PHONE.slice(2, 5)} ${PHONE.slice(5, 7)} ${PHONE.slice(7, 9)} ${PHONE.slice(9)}`;
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -85,14 +84,6 @@ export default function SiteFooter() {
 
             <div className="col-span-2 sm:col-span-1">
               <p className="foot-head">Contacto</p>
-              <a
-                href={WA_DEFAULT}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="foot-phone mt-5 inline-block"
-              >
-                {PHONE_LABEL}
-              </a>
               <p className="mt-4 text-sm font-medium leading-6 text-white/60">
                 Pedidos y dudas por WhatsApp. Te damos precio en 24–48 h.
               </p>

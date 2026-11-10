@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test scripts/worker.test.cjs",
     "cf:dev": "NEXT_DIST_DIR=.next-cf next build && npx wrangler dev --assets .next-cf"
   },
   "engines": {
